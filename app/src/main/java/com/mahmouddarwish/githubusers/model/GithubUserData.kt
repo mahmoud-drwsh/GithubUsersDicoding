@@ -1,9 +1,12 @@
 package com.mahmouddarwish.githubusers.model
 
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import kotlinx.parcelize.Parcelize
 
-data class UserData(
+@Parcelize
+data class GithubUserData(
     @SerializedName("avatar_url")
     val avatarUrl: String = "",
     @SerializedName("bio")
@@ -36,4 +39,4 @@ data class UserData(
     val type: String = "",
     @SerializedName("updated_at")
     val updatedAt: String = ""
-)
+) : Parcelable
