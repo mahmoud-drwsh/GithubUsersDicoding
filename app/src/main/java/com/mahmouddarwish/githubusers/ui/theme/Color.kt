@@ -2,12 +2,9 @@ package com.mahmouddarwish.githubusers.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple200 = Color(0xFFBB86FC)
-val Purple500 = Color(0xFF6200EE)
-val Purple700 = Color(0xFF3700B3)
-val Teal200 = Color(0xFF03DAC5)
-
-
+/*
+* The following are custom colors that were generated using the material colors tool by Google
+* */
 val primaryColor = Color(0xff1b5e20)
 val primaryLightColor = Color(0xff4c8c4a)
 val primaryDarkColor = Color(0xff003300)

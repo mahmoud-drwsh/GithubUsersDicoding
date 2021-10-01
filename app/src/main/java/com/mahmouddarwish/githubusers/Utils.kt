@@ -4,27 +4,19 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
-import androidx.compose.runtime.Composable
-
-/**
- * Used in the repository class to help manage the different states with much greater structure
- * than without
- * */
-sealed class Resource<out T> {
-    object Loading : Resource<Nothing>()
-    class Error(val message: String) : Resource<Nothing>()
-    class Loaded<T>(val users: T) : Resource<T>()
-}
 
 /**
  * The Constants used throughout the app
  * */
 object Constants {
-    const val UNKNOWN_ERROR_MESSAGE: String = "An unknown error occurred"
+    /**
+     * A generic error message
+     * */
+    const val USER_AVATAR_IMAGE_DESCRIPTION = "The user's avatar image"
 }
 
 /**
- * For opening a url in a browser
+ * For opening a url in a browser. In case of an error, a toast is displayed notifying the user
  * */
 fun Context.openWebPage(url: String) {
     val webpage: Uri = Uri.parse(url)
@@ -32,12 +24,13 @@ fun Context.openWebPage(url: String) {
     try {
         startActivity(intent)
     } catch (e: Exception) {
-        Toast.makeText(this, "Unable to open the webpage", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, getString(R.string.unable_to_open_webpage), Toast.LENGTH_SHORT).show()
     }
 }
 
 /**
- * For sharing text. In the case of this app it's used for sharing a user's profile link
+ * For sharing text. In the case of this app, it's used for sharing a user's profile link.
+ * In case of an error, a toast is displayed notifying the user
  * */
 fun Context.shareText(url: String) {
     val sendIntent: Intent = Intent().apply {
@@ -48,13 +41,11 @@ fun Context.shareText(url: String) {
     try {
         startActivity(sendIntent)
     } catch (e: Exception) {
-        Toast.makeText(this, "Unable to share due to an error", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, getString(R.string.error_unable_to_share), Toast.LENGTH_SHORT).show()
     }
 }
 
 /**
  * Returns the string if it's not `null` or empty else return the default string provided.
  * */
-fun String?.orDefault(
-    default: String
-) = if (!this.isNullOrBlank()) this else default
+fun String?.orDefault(default: String) = if (!this.isNullOrBlank()) this else default

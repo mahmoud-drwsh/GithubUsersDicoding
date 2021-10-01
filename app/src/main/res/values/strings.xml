@@ -1,4 +1,27 @@
 <resources>
     <string name="app_name">Github Users</string>
     <string name="title_activity_details">DetailsActivity</string>
+    <string name="number_of_displayed_users">Displayed users count: %s</string>
+    <string name="no_results_message">No results were found</string>
+    <string name="empty_query_string_message">Please input a name to search for</string>
+    <string name="unknown_error_message">An unknown error occurred</string>
+    <string name="unexpected_network_error">Unexpected network error</string>
+    <string name="user_has_none_message">User has none</string>
+    <string name="undefined_by_user">Not Defined by the user</string>
+    <string name="id">ID: </string>
+    <string name="followers_and_number">%s followers</string>
+    <string name="following_and_number">%s following</string>
+    <string name="visit_profile">Visit Profile</string>
+    <string name="repositories">"Repositories: "</string>
+    <string name="gists">"Gists: "</string>
+    <string name="company">"Company: "</string>
+    <string name="location">Location: </string>
+    <string name="joined">"Joined: "</string>
+    <string name="bio">"Bio: "</string>
+    <string name="search">Search</string>
+    <string name="name">Name</string>
+    <string name="home_title">GitHub Users</string>
+    <string name="loading">Loading</string>
+    <string name="unable_to_open_webpage">Unable to open the webpage</string>
+    <string name="error_unable_to_share">Unable to share due to an error</string>
 </resources>

@@ -6,12 +6,19 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 
+/*
+* The colors used here are custom ones
+* */
 private val DarkColorPalette = darkColors(
-    primary = Purple200,
-    primaryVariant = Purple700,
-    secondary = Teal200
+    primary = primaryDarkColor,
+    secondary = secondaryDarkColor,
+    onPrimary = primaryTextColor,
+    onSecondary = secondaryTextColor
 )
 
+/*
+* The colors used here are custom ones
+* */
 private val LightColorPalette = lightColors(
     primary = primaryColor,
     primaryVariant = primaryLightColor,
@@ -19,22 +26,12 @@ private val LightColorPalette = lightColors(
     secondaryVariant = secondaryLightColor,
     onPrimary = primaryTextColor,
     onSecondary = secondaryTextColor
-
-
-    /* Other default colors to override
-    background = Color.White,
-    surface = Color.White,
-    onPrimary = Color.White,
-    onSecondary = Color.Black,
-    onBackground = Color.Black,
-    onSurface = Color.Black,
-    */
 )
 
 @Composable
 fun GithubUsersTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable() () -> Unit
+    content: @Composable () -> Unit
 ) {
     val colors = if (darkTheme) {
         DarkColorPalette
