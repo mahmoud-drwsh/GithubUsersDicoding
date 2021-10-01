@@ -8,7 +8,6 @@
     <string name="unexpected_network_error">Unexpected network error</string>
     <string name="user_has_none_message">User has none</string>
     <string name="undefined_by_user">Not Defined by the user</string>
-    <string name="id">ID: </string>
     <string name="followers_and_number">%s followers</string>
     <string name="following_and_number">%s following</string>
     <string name="visit_profile">Visit Profile</string>

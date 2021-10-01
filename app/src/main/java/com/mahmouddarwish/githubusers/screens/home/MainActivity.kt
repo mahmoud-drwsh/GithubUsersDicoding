@@ -14,6 +14,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ModeNight
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.runtime.Composable
@@ -29,16 +30,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.lifecycleScope
 import coil.annotation.ExperimentalCoilApi
 import com.mahmouddarwish.githubusers.R
 import com.mahmouddarwish.githubusers.data.domain.models.GitHubUser
-import com.mahmouddarwish.githubusers.screens.CenteredLoadingMessageWithIndicator
-import com.mahmouddarwish.githubusers.screens.CenteredText
-import com.mahmouddarwish.githubusers.screens.GithubUsersList
 import com.mahmouddarwish.githubusers.screens.details.DetailsActivity
 import com.mahmouddarwish.githubusers.screens.home.HomeViewModel.HomeUIState
+import com.mahmouddarwish.githubusers.ui.components.CenteredLoadingMessageWithIndicator
+import com.mahmouddarwish.githubusers.ui.components.CenteredText
+import com.mahmouddarwish.githubusers.ui.components.GithubUsersList
 import com.mahmouddarwish.githubusers.ui.theme.GithubUsersTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 /**
  * In this screen, a list of users and their names, ID's, and short bios are displayed.
@@ -58,10 +61,13 @@ class MainActivity : ComponentActivity() {
         // This invocation is necessary in order to display the splash screen
         installSplashScreen()
 
+
         setContent {
             val uiState by viewModel.homeUIStateFlow.collectAsState(initial = HomeUIState.Loading)
 
-            GithubUsersTheme {
+            val uiMode: Boolean by viewModel.isDayUIModeFlow.collectAsState(initial = true)
+
+            GithubUsersTheme(uiMode) {
                 HomeScreen(uiState = uiState) { githubUserData ->
                     navigateToDetailsActivity(githubUserData)
                 }
@@ -80,9 +86,17 @@ class MainActivity : ComponentActivity() {
         Scaffold(modifier = modifier,
             topBar = {
                 // The action bar which is used just to display a header for the screen
-                TopAppBar(title = {
-                    Text(text = stringResource(R.string.home_title))
-                })
+                TopAppBar(
+                    title = {
+                        Text(text = stringResource(R.string.home_title))
+                    },
+                    actions = {
+                        IconButton(onClick = {
+                            lifecycleScope.launch { viewModel.toggleUIMode() }
+                        }) {
+                            Icon(Icons.Default.ModeNight, contentDescription = "")
+                        }
+                    })
             }
         ) { paddingValues ->
             // This box is used to make sure the padding values passed by the Scaffold composable
@@ -125,7 +139,12 @@ class MainActivity : ComponentActivity() {
                                     )
                                 }
                         },
-                        label = { Text(text = stringResource(R.string.search)) },
+                        label = {
+                            Text(
+                                text = stringResource(R.string.search),
+                                color = MaterialTheme.colors.onSurface
+                            )
+                        },
                         placeholder = { Text(text = stringResource(R.string.name)) },
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                         keyboardActions = KeyboardActions(onSearch = {

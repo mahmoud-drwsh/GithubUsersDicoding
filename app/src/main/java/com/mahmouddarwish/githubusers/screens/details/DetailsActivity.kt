@@ -43,10 +43,10 @@ import com.mahmouddarwish.githubusers.data.domain.models.GitHubUser
 import com.mahmouddarwish.githubusers.data.domain.models.GitHubUserDetails
 import com.mahmouddarwish.githubusers.openWebPage
 import com.mahmouddarwish.githubusers.orDefault
-import com.mahmouddarwish.githubusers.screens.CenteredLoadingMessageWithIndicator
-import com.mahmouddarwish.githubusers.screens.CenteredText
+import com.mahmouddarwish.githubusers.ui.components.CenteredLoadingMessageWithIndicator
+import com.mahmouddarwish.githubusers.ui.components.CenteredText
 import com.mahmouddarwish.githubusers.screens.CoilImage
-import com.mahmouddarwish.githubusers.screens.GithubUsersList
+import com.mahmouddarwish.githubusers.ui.components.GithubUsersList
 import com.mahmouddarwish.githubusers.shareText
 import com.mahmouddarwish.githubusers.ui.theme.GithubUsersTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -225,9 +225,9 @@ class DetailsActivity : ComponentActivity() {
                     .height(160.dp)
             ) {
                 CoilImage(
-                    modifier = modifier,
                     url = githubUserDetails.avatarUrl,
-                    imageDescription = USER_AVATAR_IMAGE_DESCRIPTION
+                    imageDescription = USER_AVATAR_IMAGE_DESCRIPTION,
+                    modifier = modifier
                 )
             }
             /**
