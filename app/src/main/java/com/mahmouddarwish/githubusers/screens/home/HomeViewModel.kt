@@ -1,14 +1,11 @@
 package com.mahmouddarwish.githubusers.screens.home
 
-import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.res.Resources
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.mahmouddarwish.githubusers.R
 import com.mahmouddarwish.githubusers.data.datastore.UIModeRepo
 import com.mahmouddarwish.githubusers.data.domain.models.GitHubUser
-import com.mahmouddarwish.githubusers.data.domain.use_cases.ChangeUIModeUseCase
 import com.mahmouddarwish.githubusers.data.domain.use_cases.SearchUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -21,27 +18,17 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     @ApplicationContext context: Context,
     private val searchRepo: SearchUseCase,
-    private val uiModeRepo: UIModeRepo
+    private val uiModeRepo: UIModeRepo,
 ) : ViewModel() {
     private val resources: Resources = context.resources
 
-    private val _searchQuery: MutableStateFlow<String> = MutableStateFlow("")
+    private val _searchQuery: MutableStateFlow<String> = MutableStateFlow("0")
     val searchQuery: StateFlow<String>
         get() = _searchQuery
 
-    val isDayUIModeFlow: Flow<Boolean> = uiModeRepo.isDayUIMode
+    val dayUIModeEnabledFlow: Flow<Boolean> = uiModeRepo.isDarkUIMode
 
-    suspend fun toggleUIMode() {
-        Log.e(TAG, "toggleUIMode:lastOrNull", )
-        val lastOrNull = isDayUIModeFlow.lastOrNull()
-        lastOrNull?.let { isDayMode ->
-            val mode = when (isDayMode) {
-                true -> ChangeUIModeUseCase.Mode.Night
-                false -> ChangeUIModeUseCase.Mode.Day
-            }
-            uiModeRepo.setUIMode(mode)
-        }
-    }
+    suspend fun toggleUIMode() = uiModeRepo.toggleUIMode()
 
     /**
      * This flow will emit new search results as soon as searchQuery changes with a delay in order to
@@ -95,4 +82,5 @@ class HomeViewModel @Inject constructor(
         class Success(val data: List<GitHubUser>) : HomeUIState()
     }
 }
+
 

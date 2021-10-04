@@ -1,8 +1,9 @@
 package com.mahmouddarwish.githubusers.data.datastore
 
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 
 object Constants {
-    val modeIntKey: Preferences.Key<Int> = intPreferencesKey("ui_mode")
+    val enableDarkModeKey: Preferences.Key<Boolean> = booleanPreferencesKey("ui_mode")
 }

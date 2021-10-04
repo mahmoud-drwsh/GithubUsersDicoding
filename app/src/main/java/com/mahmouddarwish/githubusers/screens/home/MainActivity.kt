@@ -2,6 +2,7 @@ package com.mahmouddarwish.githubusers.screens.home
 
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -14,10 +15,12 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.ModeNight
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -41,6 +44,7 @@ import com.mahmouddarwish.githubusers.ui.components.CenteredText
 import com.mahmouddarwish.githubusers.ui.components.GithubUsersList
 import com.mahmouddarwish.githubusers.ui.theme.GithubUsersTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 /**
@@ -65,10 +69,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             val uiState by viewModel.homeUIStateFlow.collectAsState(initial = HomeUIState.Loading)
 
-            val uiMode: Boolean by viewModel.isDayUIModeFlow.collectAsState(initial = true)
+            val darkUIMode: Boolean by viewModel.dayUIModeEnabledFlow.collectAsState(initial = false)
 
-            GithubUsersTheme(uiMode) {
-                HomeScreen(uiState = uiState) { githubUserData ->
+            GithubUsersTheme(darkTheme = darkUIMode) {
+                HomeScreen(uiState = uiState, darkUIModeEnabled = darkUIMode) { githubUserData ->
                     navigateToDetailsActivity(githubUserData)
                 }
             }
@@ -81,7 +85,8 @@ class MainActivity : ComponentActivity() {
     private fun HomeScreen(
         modifier: Modifier = Modifier,
         uiState: HomeUIState,
-        onUserRowItemClick: (GitHubUser) -> Unit
+        darkUIModeEnabled: Boolean,
+        onUserRowItemClick: (GitHubUser) -> Unit,
     ) {
         Scaffold(modifier = modifier,
             topBar = {
@@ -94,7 +99,10 @@ class MainActivity : ComponentActivity() {
                         IconButton(onClick = {
                             lifecycleScope.launch { viewModel.toggleUIMode() }
                         }) {
-                            Icon(Icons.Default.ModeNight, contentDescription = "")
+                            val icon =
+                                if (darkUIModeEnabled) Icons.Default.LightMode else Icons.Default.ModeNight
+
+                            Icon(icon, contentDescription = "")
                         }
                     })
             }
@@ -181,4 +189,5 @@ class MainActivity : ComponentActivity() {
     }
 
 }
+
 
