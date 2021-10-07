@@ -48,7 +48,7 @@ android {
     }
     composeOptions {
         kotlinCompilerExtensionVersion compose_version
-        kotlinCompilerVersion '1.5.21'
+        kotlinCompilerVersion '1.5.30'
     }
     packagingOptions {
         resources {
@@ -102,4 +102,13 @@ dependencies {
 // DataStore
 dependencies {
     implementation "androidx.datastore:datastore-preferences:1.0.0"
+}
+
+// Room dependencies
+dependencies {
+    def room_version = "2.3.0"
+
+    implementation "androidx.room:room-runtime:$room_version"
+    implementation "androidx.room:room-ktx:2.3.0"
+    kapt "androidx.room:room-compiler:$room_version"
 }

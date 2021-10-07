@@ -3,22 +3,36 @@ package com.mahmouddarwish.githubusers.screens.details
 import android.content.Context
 import android.content.res.Resources
 import androidx.lifecycle.ViewModel
+import com.mahmouddarwish.githubusers.CoroutinesScopesModule
 import com.mahmouddarwish.githubusers.R
-import com.mahmouddarwish.githubusers.data.domain.models.GitHubUser
-import com.mahmouddarwish.githubusers.data.domain.models.GitHubUserDetails
-import com.mahmouddarwish.githubusers.data.domain.use_cases.UserDetailsUseCase
+import com.mahmouddarwish.githubusers.data.datastore.UIModeRepo
+import com.mahmouddarwish.githubusers.data.room.FavoritesRepo
+import com.mahmouddarwish.githubusers.domain.models.GitHubUser
+import com.mahmouddarwish.githubusers.domain.models.GitHubUserDetails
+import com.mahmouddarwish.githubusers.domain.use_cases.UserDetailsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class DetailsViewModel @Inject constructor(
+    @ApplicationContext context: Context,
+    @CoroutinesScopesModule.ApplicationScope private val coroutineScope: CoroutineScope,
     private val userDetailsUseCase: UserDetailsUseCase,
-    @ApplicationContext context: Context
+    private val uiModeRepo: UIModeRepo,
+    private val favoritesRepo: FavoritesRepo
 ) : ViewModel() {
     private val resources: Resources = context.resources
+
+    val isDarkModeEnabled: Flow<Boolean> = uiModeRepo.isDarkUIMode
+
+    fun addToFavorites(user: GitHubUser) = coroutineScope.launch {
+        favoritesRepo.addFavorite(user)
+    }
 
     private suspend fun getDetails(gitHubUser: GitHubUser): GitHubUserDetails {
         return userDetailsUseCase.getUserDetails(gitHubUser.login)

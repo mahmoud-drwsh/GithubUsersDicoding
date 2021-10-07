@@ -23,4 +23,6 @@
     <string name="loading">Loading</string>
     <string name="unable_to_open_webpage">Unable to open the webpage</string>
     <string name="error_unable_to_share">Unable to share due to an error</string>
+    <string name="title_activity_favorites">FavoritesActivity</string>
+    <string name="no_favorites_message">There are none that have been added</string>
 </resources>

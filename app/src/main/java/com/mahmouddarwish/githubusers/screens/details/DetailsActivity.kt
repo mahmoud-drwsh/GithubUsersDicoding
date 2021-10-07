@@ -14,6 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.People
@@ -37,17 +38,15 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
+import com.mahmouddarwish.githubusers.*
 import com.mahmouddarwish.githubusers.Constants.USER_AVATAR_IMAGE_DESCRIPTION
 import com.mahmouddarwish.githubusers.R
-import com.mahmouddarwish.githubusers.data.domain.models.GitHubUser
-import com.mahmouddarwish.githubusers.data.domain.models.GitHubUserDetails
-import com.mahmouddarwish.githubusers.openWebPage
-import com.mahmouddarwish.githubusers.orDefault
+import com.mahmouddarwish.githubusers.domain.models.GitHubUser
+import com.mahmouddarwish.githubusers.domain.models.GitHubUserDetails
+import com.mahmouddarwish.githubusers.screens.CoilImage
 import com.mahmouddarwish.githubusers.ui.components.CenteredLoadingMessageWithIndicator
 import com.mahmouddarwish.githubusers.ui.components.CenteredText
-import com.mahmouddarwish.githubusers.screens.CoilImage
 import com.mahmouddarwish.githubusers.ui.components.GithubUsersList
-import com.mahmouddarwish.githubusers.shareText
 import com.mahmouddarwish.githubusers.ui.theme.GithubUsersTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -60,11 +59,14 @@ class DetailsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+
             val detailsUIState: DetailsViewModel.DetailsUIState by viewModel
                 .createDetailsUIStateFlow(extractPassedGithubUser())
                 .collectAsState(initial = DetailsViewModel.DetailsUIState.Loading)
 
-            GithubUsersTheme {
+            val darkThemeEnabled by viewModel.isDarkModeEnabled.collectAsState(initial = false)
+
+            GithubUsersTheme(darkThemeEnabled) {
                 DetailsScreen(detailsUIState)
             }
         }
@@ -97,7 +99,7 @@ class DetailsActivity : ComponentActivity() {
         Scaffold(
             topBar = {
                 DetailsActionBar(githubUserDetails = githubUser)
-            }
+            },
         ) { paddingValues -> /* These values are used so that the content wouldn't be behind
                     the bottomBar for example */
             DetailsScreenScaffoldContent(
@@ -116,7 +118,7 @@ class DetailsActivity : ComponentActivity() {
         paddingValues: PaddingValues,
         githubUser: GitHubUserDetails,
         followingUIState: DetailsViewModel.PeopleUIState,
-        followersUIState: DetailsViewModel.PeopleUIState
+        followersUIState: DetailsViewModel.PeopleUIState,
     ) {
         val tabs = remember {
             listOf(
@@ -171,7 +173,7 @@ class DetailsActivity : ComponentActivity() {
     @Composable
     private fun FollowersTabPage(
         modifier: Modifier = Modifier,
-        followersUIState: DetailsViewModel.PeopleUIState
+        followersUIState: DetailsViewModel.PeopleUIState,
     ) {
         when (followersUIState) {
             is DetailsViewModel.PeopleUIState.Error -> {
@@ -207,161 +209,194 @@ class DetailsActivity : ComponentActivity() {
     @Composable
     private fun UserDetailsTabPage(
         modifier: Modifier = Modifier,
-        githubUserDetails: GitHubUserDetails
+        githubUserDetails: GitHubUserDetails,
     ) {
-        Column(
-            verticalArrangement = spacedBy(4.dp),
-            modifier = modifier
-                .verticalScroll(rememberScrollState())
-                .padding(8.dp)
-        ) {
-            /**
-             * The user image
-             * */
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(160.dp)
-            ) {
-                CoilImage(
-                    url = githubUserDetails.avatarUrl,
-                    imageDescription = USER_AVATAR_IMAGE_DESCRIPTION,
-                    modifier = modifier
-                )
+        Scaffold(
+            floatingActionButton = {
+                FloatingActionButton(onClick = {
+                    viewModel.addToFavorites(githubUserDetails.toGitHubUser())
+                }) {
+                    Icon(Icons.Default.Favorite, contentDescription = "")
+                }
             }
-            /**
-             * The name of the user
-             * */
-            Text(
-                text = githubUserDetails.name.orDefault(stringResource(id = R.string.undefined_by_user)),
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth(),
-                style = MaterialTheme.typography.h4
-            )
-            /**
-             * The user ID
-             * */
-            Text(
-                text = githubUserDetails.login,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            /**
-             * The user details card
-             * */
-            Card(elevation = 8.dp, modifier = Modifier.fillMaxWidth()) {
-                Column(
+        ) { paddingValues ->
+            Column(
+                verticalArrangement = spacedBy(4.dp),
+                modifier = modifier
+                    .verticalScroll(rememberScrollState())
+                    .padding(paddingValues)
+                    .padding(bottom = 96.dp)
+                    .padding(8.dp)
+            ) {
+                /**
+                 * The user image
+                 * */
+                Box(
+                    contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp)
+                        .height(160.dp)
                 ) {
-                    /**
-                     * Following and followers row
-                     * */
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = spacedBy(4.dp),
-                        modifier = Modifier
-                            .wrapContentHeight()
-                    ) {
-                        Icon(
-                            Icons.Outlined.People,
-                            contentDescription = "Icon for people following and the followers"
-                        )
-                        Text(
-                            text = stringResource(
-                                id = R.string.followers_and_number,
-                                githubUserDetails.followers
-                            )
-                        )
-                        Box(
-                            Modifier
-                                .clip(CircleShape), content = {
-                                Surface(
-                                    color = Color.Black.copy(alpha = 0.5f),
-                                    modifier = Modifier
-                                        .size(4.dp)
-                                ) {}
-                            })
-                        Text(
-                            text = stringResource(
-                                id = R.string.following_and_number,
-                                githubUserDetails.following
-                            )
-                        )
-                    }
-                    /**
-                     * Repositories
-                     * */
-                    Text(text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append(stringResource(R.string.repositories))
-                        }
-                        append(githubUserDetails.publicRepos.toString())
-                    })
-                    /**
-                     * Gists
-                     * */
-                    Text(text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append(stringResource(R.string.gists))
-                        }
-                        append(githubUserDetails.publicGists.toString())
-                    })
-                    /**
-                     * Company
-                     * */
-                    Text(text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append(stringResource(R.string.company))
-                        }
-                        append(githubUserDetails.company.orDefault(stringResource(id = R.string.undefined_by_user)))
-                    })
-                    /**
-                     * Location
-                     * */
-                    Text(text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append(stringResource(R.string.location))
-                        }
-                        append(githubUserDetails.location.orDefault(stringResource(R.string.undefined_by_user)))
-                    })
-                    /**
-                     * Joining date
-                     * */
-                    Text(text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append(stringResource(R.string.joined))
-                        }
-                        append(githubUserDetails.createdAt.substring(0..9))
-                    })
-                    /**
-                     * Bio
-                     * */
-                    Text(text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append(stringResource(R.string.bio))
-                        }
-                        append(githubUserDetails.bio.orDefault(stringResource(id = R.string.undefined_by_user)))
-                    })
+                    CoilImage(
+                        url = githubUserDetails.avatarUrl,
+                        imageDescription = USER_AVATAR_IMAGE_DESCRIPTION,
+                        modifier = modifier
+                    )
                 }
-            }
-            /**
-             * Visit profile button
-             * */
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                    openWebPage(githubUserDetails.htmlUrl)
-                }
-            ) {
+                /**
+                 * The name of the user
+                 * */
                 Text(
-                    text = stringResource(R.string.visit_profile),
-                    Modifier.padding(end = 8.dp),
-                    color = MaterialTheme.colors.onPrimary
+                    text = githubUserDetails.name.orDefault(stringResource(id = R.string.undefined_by_user)),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                    style = MaterialTheme.typography.h4
                 )
-                Icon(Icons.Default.OpenInBrowser, "")
+                /**
+                 * The user ID
+                 * */
+                Text(
+                    text = githubUserDetails.login,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                /**
+                 * The user details card
+                 * */
+                Card(elevation = 8.dp, modifier = Modifier.fillMaxWidth()) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    ) {
+                        /**
+                         * Following and followers row
+                         * */
+                        /**
+                         * Following and followers row
+                         * */
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = spacedBy(4.dp),
+                            modifier = Modifier
+                                .wrapContentHeight()
+                        ) {
+                            Icon(
+                                Icons.Outlined.People,
+                                contentDescription = "Icon for people following and the followers"
+                            )
+                            Text(
+                                text = stringResource(
+                                    id = R.string.followers_and_number,
+                                    githubUserDetails.followers
+                                )
+                            )
+                            Box(
+                                Modifier
+                                    .clip(CircleShape), content = {
+                                    Surface(
+                                        color = Color.Black.copy(alpha = 0.5f),
+                                        modifier = Modifier
+                                            .size(4.dp)
+                                    ) {}
+                                })
+                            Text(
+                                text = stringResource(
+                                    id = R.string.following_and_number,
+                                    githubUserDetails.following
+                                )
+                            )
+                        }
+                        /**
+                         * Repositories
+                         * */
+                        /**
+                         * Repositories
+                         * */
+                        Text(text = buildAnnotatedString {
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append(stringResource(R.string.repositories))
+                            }
+                            append(githubUserDetails.publicRepos.toString())
+                        })
+                        /**
+                         * Gists
+                         * */
+                        /**
+                         * Gists
+                         * */
+                        Text(text = buildAnnotatedString {
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append(stringResource(R.string.gists))
+                            }
+                            append(githubUserDetails.publicGists.toString())
+                        })
+                        /**
+                         * Company
+                         * */
+                        /**
+                         * Company
+                         * */
+                        Text(text = buildAnnotatedString {
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append(stringResource(R.string.company))
+                            }
+                            append(githubUserDetails.company.orDefault(stringResource(id = R.string.undefined_by_user)))
+                        })
+                        /**
+                         * Location
+                         * */
+                        /**
+                         * Location
+                         * */
+                        Text(text = buildAnnotatedString {
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append(stringResource(R.string.location))
+                            }
+                            append(githubUserDetails.location.orDefault(stringResource(R.string.undefined_by_user)))
+                        })
+                        /**
+                         * Joining date
+                         * */
+                        /**
+                         * Joining date
+                         * */
+                        Text(text = buildAnnotatedString {
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append(stringResource(R.string.joined))
+                            }
+                            append(githubUserDetails.createdAt.substring(0..9))
+                        })
+                        /**
+                         * Bio
+                         * */
+                        /**
+                         * Bio
+                         * */
+                        Text(text = buildAnnotatedString {
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append(stringResource(R.string.bio))
+                            }
+                            append(githubUserDetails.bio.orDefault(stringResource(id = R.string.undefined_by_user)))
+                        })
+                    }
+                }
+                /**
+                 * Visit profile button
+                 * */
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        openWebPage(githubUserDetails.htmlUrl)
+                    }
+                ) {
+                    Text(
+                        text = stringResource(R.string.visit_profile),
+                        Modifier.padding(end = 8.dp),
+                        color = MaterialTheme.colors.onPrimary
+                    )
+                    Icon(Icons.Default.OpenInBrowser, "")
+                }
             }
         }
     }
@@ -372,7 +407,7 @@ class DetailsActivity : ComponentActivity() {
     @Composable
     private fun DetailsActionBar(
         modifier: Modifier = Modifier,
-        githubUserDetails: GitHubUserDetails
+        githubUserDetails: GitHubUserDetails,
     ) {
         TopAppBar(
             modifier = modifier,
@@ -380,7 +415,7 @@ class DetailsActivity : ComponentActivity() {
             navigationIcon = {
                 IconButton(onClick = {
                     // ending the activity and going back to the previous one.
-                    navigateBack()
+                    navigateUp()
                 }) {
                     Icon(Icons.Default.ArrowBack, contentDescription = "Navigating back icon")
                 }
@@ -419,21 +454,12 @@ class DetailsActivity : ComponentActivity() {
         * */
         fun createIntentWithGithubUserData(
             context: Context,
-            githubUserDetails: GitHubUser
+            githubUserDetails: GitHubUser,
         ): Intent {
             return Intent(context, DetailsActivity::class.java).apply {
                 putExtra(USER_INTENT_KEY, githubUserDetails)
             }
         }
-
-        /*
-         * Although a separate method is not needed, I wrote this one to make it easier
-         * to understand what's going on.
-         *
-         * Navigating back works by letting the backstack decide what to display after this
-         * activity finishes
-         * */
-        private fun DetailsActivity.navigateBack() = finish()
 
         /*
         * Just extracts the passed GitHubUser object and returns it

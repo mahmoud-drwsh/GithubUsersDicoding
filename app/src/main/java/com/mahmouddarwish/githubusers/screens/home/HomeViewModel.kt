@@ -5,8 +5,8 @@ import android.content.res.Resources
 import androidx.lifecycle.ViewModel
 import com.mahmouddarwish.githubusers.R
 import com.mahmouddarwish.githubusers.data.datastore.UIModeRepo
-import com.mahmouddarwish.githubusers.data.domain.models.GitHubUser
-import com.mahmouddarwish.githubusers.data.domain.use_cases.SearchUseCase
+import com.mahmouddarwish.githubusers.domain.models.GitHubUser
+import com.mahmouddarwish.githubusers.domain.use_cases.SearchUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.FlowPreview

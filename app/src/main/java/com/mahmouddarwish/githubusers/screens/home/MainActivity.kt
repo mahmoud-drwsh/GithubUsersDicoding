@@ -2,28 +2,27 @@ package com.mahmouddarwish.githubusers.screens.home
 
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.ModeNight
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,15 +35,15 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import coil.annotation.ExperimentalCoilApi
 import com.mahmouddarwish.githubusers.R
-import com.mahmouddarwish.githubusers.data.domain.models.GitHubUser
+import com.mahmouddarwish.githubusers.domain.models.GitHubUser
 import com.mahmouddarwish.githubusers.screens.details.DetailsActivity
+import com.mahmouddarwish.githubusers.screens.favorites.FavoritesActivity.Companion.navigateToFavoritesActivity
 import com.mahmouddarwish.githubusers.screens.home.HomeViewModel.HomeUIState
 import com.mahmouddarwish.githubusers.ui.components.CenteredLoadingMessageWithIndicator
 import com.mahmouddarwish.githubusers.ui.components.CenteredText
 import com.mahmouddarwish.githubusers.ui.components.GithubUsersList
 import com.mahmouddarwish.githubusers.ui.theme.GithubUsersTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 /**
@@ -55,6 +54,7 @@ import kotlinx.coroutines.launch
  * The Compose ConstraintsLayout is used here as per the submission requirements.
  * */
 @ExperimentalCoilApi
+@OptIn(ExperimentalComposeUiApi::class)
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val viewModel: HomeViewModel by viewModels()
@@ -80,7 +80,6 @@ class MainActivity : ComponentActivity() {
     }
 
 
-    @OptIn(ExperimentalComposeUiApi::class)
     @Composable
     private fun HomeScreen(
         modifier: Modifier = Modifier,
@@ -100,9 +99,19 @@ class MainActivity : ComponentActivity() {
                             lifecycleScope.launch { viewModel.toggleUIMode() }
                         }) {
                             val icon =
-                                if (darkUIModeEnabled) Icons.Default.LightMode else Icons.Default.ModeNight
+                                if (darkUIModeEnabled) Icons.Default.LightMode
+                                else Icons.Default.ModeNight
 
-                            Icon(icon, contentDescription = "")
+                            Icon(
+                                icon,
+                                contentDescription = "toggle UI mode to either the day or the dark mode"
+                            )
+                        }
+
+                        IconButton(onClick = {
+                            navigateToFavoritesActivity()
+                        }) {
+                            Icon(Icons.Default.Favorite, contentDescription = "")
                         }
                     })
             }
@@ -113,54 +122,7 @@ class MainActivity : ComponentActivity() {
                 modifier = Modifier
                     .padding(paddingValues),
             ) {
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .background(Color.Transparent)
-                        .padding(horizontal = 8.dp)
-                        .padding(top = 8.dp),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // var queryString by remember { mutableStateOf("") }
-                    val queryString by viewModel.searchQuery.collectAsState("")
-                    val keyboardController = LocalSoftwareKeyboardController.current
-
-                    TextField(
-                        value = queryString,
-                        // onValueChange = { newValue -> queryString = newValue },
-                        onValueChange = { newValue -> viewModel.setQuery(newValue) },
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(CircleShape)
-                            .border(BorderStroke(1.dp, Color.LightGray), CircleShape),
-                        singleLine = true,
-                        leadingIcon = {
-                            Icon(Icons.Default.Search, contentDescription = "Search field icon")
-                        },
-                        trailingIcon = {
-                            if (queryString.isNotEmpty())
-                                IconButton(onClick = { viewModel.setQuery(("")) }) {
-                                    Icon(
-                                        Icons.Outlined.Clear,
-                                        contentDescription = "Clear search field icon"
-                                    )
-                                }
-                        },
-                        label = {
-                            Text(
-                                text = stringResource(R.string.search),
-                                color = MaterialTheme.colors.onSurface
-                            )
-                        },
-                        placeholder = { Text(text = stringResource(R.string.name)) },
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                        keyboardActions = KeyboardActions(onSearch = {
-                            keyboardController?.hide()
-                            viewModel.setQuery(queryString)
-                        })
-                    )
-                }
+                UsersSearchField()
 
                 // Displaying the corresponding content to the UI state
                 when (uiState) {
@@ -181,13 +143,57 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @Composable
+    private fun UsersSearchField() {
+        Surface(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp)
+                .padding(top = 8.dp)
+        ) {
+            val queryString by viewModel.searchQuery.collectAsState("")
+            val keyboardController = LocalSoftwareKeyboardController.current
+
+            TextField(
+                value = queryString,
+                onValueChange = { newValue -> viewModel.setQuery(newValue) },
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .border(BorderStroke(1.dp, Color.LightGray), CircleShape),
+                singleLine = true,
+                leadingIcon = {
+                    Icon(Icons.Default.Search, contentDescription = "Search field icon")
+                },
+                trailingIcon = {
+                    if (queryString.isNotEmpty())
+                        IconButton(onClick = { viewModel.setQuery(("")) }) {
+                            Icon(
+                                Icons.Outlined.Clear,
+                                contentDescription = "Clear search field icon"
+                            )
+                        }
+                },
+                label = {
+                    Text(
+                        text = stringResource(R.string.search),
+                        color = MaterialTheme.colors.onSurface
+                    )
+                },
+                placeholder = { Text(text = stringResource(R.string.name)) },
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions = KeyboardActions(onSearch = {
+                    keyboardController?.hide()
+                })
+            )
+        }
+    }
+
     companion object {
         private fun MainActivity.navigateToDetailsActivity(githubUserDetails: GitHubUser) {
             val intent = DetailsActivity.createIntentWithGithubUserData(this, githubUserDetails)
             startActivity(intent)
         }
     }
-
 }
 
 

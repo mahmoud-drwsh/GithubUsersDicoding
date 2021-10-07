@@ -1,7 +1,7 @@
-package com.mahmouddarwish.githubusers.data.domain.use_cases
+package com.mahmouddarwish.githubusers.domain.use_cases
 
-import com.mahmouddarwish.githubusers.data.domain.models.GitHubUser
-import com.mahmouddarwish.githubusers.data.domain.models.GitHubUserDetails
+import com.mahmouddarwish.githubusers.domain.models.GitHubUser
+import com.mahmouddarwish.githubusers.domain.models.GitHubUserDetails
 
 /**
  * This interface represents the features required in the details screen

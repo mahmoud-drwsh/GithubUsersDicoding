@@ -1,6 +1,6 @@
-package com.mahmouddarwish.githubusers.data.domain.use_cases
+package com.mahmouddarwish.githubusers.domain.use_cases
 
-import com.mahmouddarwish.githubusers.data.domain.models.GitHubUser
+import com.mahmouddarwish.githubusers.domain.models.GitHubUser
 
 /**
  * This interface represents the feature of searching

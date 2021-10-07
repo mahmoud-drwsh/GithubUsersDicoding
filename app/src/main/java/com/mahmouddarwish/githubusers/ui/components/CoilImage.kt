@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,18 +28,18 @@ fun CoilImage(url: String, imageDescription: String, modifier: Modifier = Modifi
     }
 
     if (isImageNotReady(painter)) {
-        // show a loading indicator while the image is still being loaded
+        // show a loading indicator while the image is being loaded
         CircularProgressIndicator(modifier)
     } else {
-        Image(
-            painter = painter,
-            contentDescription = imageDescription,
-            modifier = modifier
-                .clip(CircleShape)
-                .shadow(8.dp, CircleShape)
-                .fillMaxHeight(),
-            contentScale = ContentScale.FillHeight
-        )
+        Surface(modifier.shadow(4.dp, CircleShape)) {
+            Image(
+                painter = painter,
+                contentDescription = imageDescription,
+                modifier = Modifier
+                    .fillMaxHeight(),
+                contentScale = ContentScale.FillHeight
+            )
+        }
     }
 }
 

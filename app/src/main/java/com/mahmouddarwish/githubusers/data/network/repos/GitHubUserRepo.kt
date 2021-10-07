@@ -1,8 +1,8 @@
 package com.mahmouddarwish.githubusers.data.network.repos
 
-import com.mahmouddarwish.githubusers.data.domain.models.GitHubUser
-import com.mahmouddarwish.githubusers.data.domain.models.GitHubUserDetails
-import com.mahmouddarwish.githubusers.data.domain.use_cases.UserDetailsUseCase
+import com.mahmouddarwish.githubusers.domain.models.GitHubUser
+import com.mahmouddarwish.githubusers.domain.models.GitHubUserDetails
+import com.mahmouddarwish.githubusers.domain.use_cases.UserDetailsUseCase
 import com.mahmouddarwish.githubusers.data.network.api.GitHubService
 import javax.inject.Inject
 import javax.inject.Singleton

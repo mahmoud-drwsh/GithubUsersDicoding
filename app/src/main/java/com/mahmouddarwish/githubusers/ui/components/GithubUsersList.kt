@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.mahmouddarwish.githubusers.R
-import com.mahmouddarwish.githubusers.data.domain.models.GitHubUser
+import com.mahmouddarwish.githubusers.domain.models.GitHubUser
 
 /**
  * This Composable is used to display a list of GitHubUsers that are received from the API

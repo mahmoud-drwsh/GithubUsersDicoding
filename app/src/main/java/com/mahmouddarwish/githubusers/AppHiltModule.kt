@@ -1,15 +1,21 @@
 package com.mahmouddarwish.githubusers
 
-import com.mahmouddarwish.githubusers.data.domain.use_cases.SearchUseCase
-import com.mahmouddarwish.githubusers.data.domain.use_cases.UserDetailsUseCase
+import android.content.Context
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import com.mahmouddarwish.githubusers.domain.use_cases.SearchUseCase
+import com.mahmouddarwish.githubusers.domain.use_cases.UserDetailsUseCase
 import com.mahmouddarwish.githubusers.data.network.api.Constants.API_BASE_URL
 import com.mahmouddarwish.githubusers.data.network.api.GitHubService
 import com.mahmouddarwish.githubusers.data.network.api.okHttpClient
 import com.mahmouddarwish.githubusers.data.network.repos.GitHubUserRepo
 import com.mahmouddarwish.githubusers.data.network.repos.UsersSearchRepo
+import com.mahmouddarwish.githubusers.data.room.FavoritesDao
+import com.mahmouddarwish.githubusers.data.room.FavoritesRoomDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -45,6 +51,22 @@ object AppHiltModule {
     @Provides
     fun provideSearchRepo(service: GitHubService): SearchUseCase =
         UsersSearchRepo(service)
+
+    @Singleton
+    @Provides
+    fun provideRoomDb(@ApplicationContext context: Context): FavoritesRoomDatabase {
+        return Room
+            .databaseBuilder<FavoritesRoomDatabase>(context,
+                FavoritesRoomDatabase::class.java,
+                "main_db")
+            .build()
+    }
+
+    @Singleton
+    @Provides
+    fun provideFavoritesDao(favoritesRoomDatabase: FavoritesRoomDatabase): FavoritesDao {
+        return favoritesRoomDatabase.FavoritesDao()
+    }
 }
 
 

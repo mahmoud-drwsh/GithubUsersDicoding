@@ -12,10 +12,15 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_github_round"
         android:supportsRtl="true"
-        android:windowSoftInputMode="adjustResize"
         android:theme="@style/Theme.GithubUsers"
         android:usesCleartextTraffic="true"
+        android:windowSoftInputMode="adjustResize"
         tools:targetApi="m">
+        <activity
+            android:name="com.mahmouddarwish.githubusers.screens.favorites.FavoritesActivity"
+            android:exported="true"
+            android:label="@string/title_activity_favorites"
+            android:theme="@style/Theme.GithubUsers.NoActionBar" />
         <activity
             android:name=".screens.details.DetailsActivity"
             android:exported="true"

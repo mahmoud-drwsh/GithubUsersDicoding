@@ -1,5 +1,6 @@
 package com.mahmouddarwish.githubusers
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -49,3 +50,12 @@ fun Context.shareText(url: String) {
  * Returns the string if it's not `null` or empty else return the default string provided.
  * */
 fun String?.orDefault(default: String) = if (!this.isNullOrBlank()) this else default
+
+/**
+ *
+ * Although a separate method is not needed, I wrote this one to make it easier
+ * to understand what's going on.
+ * Navigating back works by letting the backstack decide what to display after this
+ * activity finishes.
+ * */
+fun Activity.navigateUp() = finish()

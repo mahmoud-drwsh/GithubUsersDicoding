@@ -1,8 +1,8 @@
 package com.mahmouddarwish.githubusers.data.network.api
 
-import com.mahmouddarwish.githubusers.data.domain.models.GitHubUser
-import com.mahmouddarwish.githubusers.data.domain.models.GitHubUserDetails
-import com.mahmouddarwish.githubusers.data.domain.models.GithubUsersSearchResponse
+import com.mahmouddarwish.githubusers.domain.models.GitHubUser
+import com.mahmouddarwish.githubusers.domain.models.GitHubUserDetails
+import com.mahmouddarwish.githubusers.domain.models.GithubUsersSearchResponse
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query

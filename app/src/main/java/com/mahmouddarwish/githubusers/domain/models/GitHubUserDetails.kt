@@ -1,4 +1,4 @@
-package com.mahmouddarwish.githubusers.data.domain.models
+package com.mahmouddarwish.githubusers.domain.models
 
 
 import com.google.gson.annotations.SerializedName
@@ -32,4 +32,11 @@ data class GitHubUserDetails(
     val publicRepos: Int = 0,
     @SerializedName("url")
     val url: String = ""
-)
+) {
+    fun toGitHubUser(): GitHubUser = GitHubUser(
+        avatarUrl = avatarUrl,
+        htmlUrl = htmlUrl,
+        login = login,
+        url = url
+    )
+}

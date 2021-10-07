@@ -1,4 +1,4 @@
-package com.mahmouddarwish.githubusers.data.domain.use_cases
+package com.mahmouddarwish.githubusers.domain.use_cases
 
 import kotlinx.coroutines.flow.Flow
 
