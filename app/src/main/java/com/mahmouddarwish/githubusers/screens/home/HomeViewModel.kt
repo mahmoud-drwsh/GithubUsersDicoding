@@ -4,8 +4,8 @@ import android.content.Context
 import android.content.res.Resources
 import androidx.lifecycle.ViewModel
 import com.mahmouddarwish.githubusers.R
-import com.mahmouddarwish.githubusers.data.datastore.UIModeRepo
 import com.mahmouddarwish.githubusers.domain.models.GitHubUser
+import com.mahmouddarwish.githubusers.domain.use_cases.ChangeUIModeUseCase
 import com.mahmouddarwish.githubusers.domain.use_cases.SearchUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -15,11 +15,13 @@ import retrofit2.HttpException
 import javax.inject.Inject
 
 @HiltViewModel
+@OptIn(FlowPreview::class)
 class HomeViewModel @Inject constructor(
     @ApplicationContext context: Context,
     private val searchRepo: SearchUseCase,
-    private val uiModeRepo: UIModeRepo,
+    private val uiModeRepo: ChangeUIModeUseCase,
 ) : ViewModel() {
+
     private val resources: Resources = context.resources
 
     private val _searchQuery: MutableStateFlow<String> = MutableStateFlow("0")
@@ -34,7 +36,6 @@ class HomeViewModel @Inject constructor(
      * This flow will emit new search results as soon as searchQuery changes with a delay in order to
      * prevent making too many requests and to prevent making requests needlessly
      * */
-    @OptIn(FlowPreview::class)
     val homeUIStateFlow: Flow<HomeUIState> = flow {
         searchQuery
             // adding a delay to avoid making requests needlessly

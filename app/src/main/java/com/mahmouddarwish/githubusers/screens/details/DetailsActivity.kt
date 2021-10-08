@@ -3,6 +3,7 @@ package com.mahmouddarwish.githubusers.screens.details
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -13,10 +14,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.OpenInBrowser
-import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.People
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -49,6 +47,9 @@ import com.mahmouddarwish.githubusers.ui.components.CenteredText
 import com.mahmouddarwish.githubusers.ui.components.GithubUsersList
 import com.mahmouddarwish.githubusers.ui.theme.GithubUsersTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -56,12 +57,14 @@ class DetailsActivity : ComponentActivity() {
     private val viewModel by viewModels<DetailsViewModel>()
 
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
 
-            val detailsUIState: DetailsViewModel.DetailsUIState by viewModel
-                .createDetailsUIStateFlow(extractPassedGithubUser())
+        viewModel.setUser(extractPassedGithubUser())
+
+        setContent {
+            val detailsUIState: DetailsViewModel.DetailsUIState by viewModel.detailsUIStateFlow
                 .collectAsState(initial = DetailsViewModel.DetailsUIState.Loading)
 
             val darkThemeEnabled by viewModel.isDarkModeEnabled.collectAsState(initial = false)
@@ -73,38 +76,33 @@ class DetailsActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun DetailsScreen(detailsUIState: DetailsViewModel.DetailsUIState) {
+    private fun DetailsScreen(detailsUIState: DetailsViewModel.DetailsUIState) =
         when (detailsUIState) {
-            is DetailsViewModel.DetailsUIState.Error -> {
-                CenteredText(text = detailsUIState.message)
-            }
-            is DetailsViewModel.DetailsUIState.Success -> {
-                DetailsScreenContent(detailsUIState)
-            }
+            is DetailsViewModel.DetailsUIState.Error -> CenteredText(text = detailsUIState.message)
+            is DetailsViewModel.DetailsUIState.Success -> DetailsScreenContent(detailsUIState)
             DetailsViewModel.DetailsUIState.Loading -> CenteredLoadingMessageWithIndicator()
         }
-    }
 
 
     @Composable
     private fun DetailsScreenContent(detailsUIState: DetailsViewModel.DetailsUIState.Success) {
-        val githubUser = detailsUIState.gitHubUserDetails
+        val user = detailsUIState.gitHubUserDetails
 
-        val followersUIState by viewModel.getFollowers(githubUser.login)
+        val followersUIState by viewModel.getFollowers(user.login)
             .collectAsState(initial = DetailsViewModel.PeopleUIState.Loading)
 
-        val followingUIState by viewModel.getFollowing(githubUser.login)
+        val followingUIState by viewModel.getFollowing(user.login)
             .collectAsState(initial = DetailsViewModel.PeopleUIState.Loading)
 
         Scaffold(
             topBar = {
-                DetailsActionBar(githubUserDetails = githubUser)
+                DetailsActionBar(githubUserDetails = user)
             },
         ) { paddingValues -> /* These values are used so that the content wouldn't be behind
                     the bottomBar for example */
             DetailsScreenScaffoldContent(
                 paddingValues,
-                githubUser,
+                user,
                 followingUIState,
                 followersUIState
             )
@@ -174,18 +172,16 @@ class DetailsActivity : ComponentActivity() {
     private fun FollowersTabPage(
         modifier: Modifier = Modifier,
         followersUIState: DetailsViewModel.PeopleUIState,
-    ) {
-        when (followersUIState) {
-            is DetailsViewModel.PeopleUIState.Error -> {
-                CenteredText(text = followersUIState.message, modifier = modifier)
-            }
-            is DetailsViewModel.PeopleUIState.Success -> {
-                GithubUsersList(users = followersUIState.users, modifier = modifier.fillMaxSize())
-            }
-            DetailsViewModel.PeopleUIState.Loading -> {
-                CenteredLoadingMessageWithIndicator(modifier)
-            }
-        }
+    ) = when (followersUIState) {
+        is DetailsViewModel.PeopleUIState.Error -> CenteredText(
+            text = followersUIState.message,
+            modifier = modifier
+        )
+        is DetailsViewModel.PeopleUIState.Success -> GithubUsersList(
+            users = followersUIState.users,
+            modifier = modifier.fillMaxSize()
+        )
+        DetailsViewModel.PeopleUIState.Loading -> CenteredLoadingMessageWithIndicator(modifier)
     }
 
     @Composable
@@ -211,12 +207,22 @@ class DetailsActivity : ComponentActivity() {
         modifier: Modifier = Modifier,
         githubUserDetails: GitHubUserDetails,
     ) {
+        val isFavorite by viewModel.isUserAFavorite.collectAsState(initial = false)
+
         Scaffold(
             floatingActionButton = {
                 FloatingActionButton(onClick = {
-                    viewModel.addToFavorites(githubUserDetails.toGitHubUser())
+                    viewModel.toggleFavoriteStatus(githubUserDetails, isFavorite)
+                    Toast.makeText(
+                        this,
+                        if (isFavorite) "Removing from favorites" else "Adding to favorites",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }) {
-                    Icon(Icons.Default.Favorite, contentDescription = "")
+                    val icon =
+                        if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder
+
+                    Icon(icon, contentDescription = "")
                 }
             }
         ) { paddingValues ->
@@ -400,6 +406,7 @@ class DetailsActivity : ComponentActivity() {
             }
         }
     }
+
 
     /**
      * The action bar of the details screen

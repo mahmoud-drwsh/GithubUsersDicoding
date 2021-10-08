@@ -59,3 +59,9 @@ fun String?.orDefault(default: String) = if (!this.isNullOrBlank()) this else de
  * activity finishes.
  * */
 fun Activity.navigateUp() = finish()
+
+sealed class Resource<out T>() {
+    object Loading : Resource<Nothing>()
+    class Error(val message: String) : Resource<Nothing>()
+    class Success<T>(val data: T) : Resource<T>()
+}

@@ -2,16 +2,19 @@ package com.mahmouddarwish.githubusers
 
 import android.content.Context
 import androidx.room.Room
-import androidx.room.RoomDatabase
-import com.mahmouddarwish.githubusers.domain.use_cases.SearchUseCase
-import com.mahmouddarwish.githubusers.domain.use_cases.UserDetailsUseCase
+import com.mahmouddarwish.githubusers.data.datastore.UIModeRepo
 import com.mahmouddarwish.githubusers.data.network.api.Constants.API_BASE_URL
 import com.mahmouddarwish.githubusers.data.network.api.GitHubService
 import com.mahmouddarwish.githubusers.data.network.api.okHttpClient
 import com.mahmouddarwish.githubusers.data.network.repos.GitHubUserRepo
 import com.mahmouddarwish.githubusers.data.network.repos.UsersSearchRepo
 import com.mahmouddarwish.githubusers.data.room.FavoritesDao
+import com.mahmouddarwish.githubusers.data.room.FavoritesRepo
 import com.mahmouddarwish.githubusers.data.room.FavoritesRoomDatabase
+import com.mahmouddarwish.githubusers.domain.use_cases.ChangeUIModeUseCase
+import com.mahmouddarwish.githubusers.domain.use_cases.ManageFavoritesUseCase
+import com.mahmouddarwish.githubusers.domain.use_cases.SearchUseCase
+import com.mahmouddarwish.githubusers.domain.use_cases.UserDetailsUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -54,12 +57,16 @@ object AppHiltModule {
 
     @Singleton
     @Provides
+    fun provideFavoritesRepo(favoritesRepo: FavoritesRepo): ManageFavoritesUseCase = favoritesRepo
+
+    @Singleton
+    @Provides
+    fun provideUIModeRepo(uiModeRepo: UIModeRepo): ChangeUIModeUseCase = uiModeRepo
+
+    @Singleton
+    @Provides
     fun provideRoomDb(@ApplicationContext context: Context): FavoritesRoomDatabase {
-        return Room
-            .databaseBuilder<FavoritesRoomDatabase>(context,
-                FavoritesRoomDatabase::class.java,
-                "main_db")
-            .build()
+        return Room.databaseBuilder(context, FavoritesRoomDatabase::class.java, "main_db").build()
     }
 
     @Singleton

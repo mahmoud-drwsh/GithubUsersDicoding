@@ -5,60 +5,78 @@ import android.content.res.Resources
 import androidx.lifecycle.ViewModel
 import com.mahmouddarwish.githubusers.CoroutinesScopesModule
 import com.mahmouddarwish.githubusers.R
+import com.mahmouddarwish.githubusers.Resource
 import com.mahmouddarwish.githubusers.data.datastore.UIModeRepo
-import com.mahmouddarwish.githubusers.data.room.FavoritesRepo
 import com.mahmouddarwish.githubusers.domain.models.GitHubUser
 import com.mahmouddarwish.githubusers.domain.models.GitHubUserDetails
+import com.mahmouddarwish.githubusers.domain.use_cases.ChangeUIModeUseCase
+import com.mahmouddarwish.githubusers.domain.use_cases.ManageFavoritesUseCase
 import com.mahmouddarwish.githubusers.domain.use_cases.UserDetailsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
+@OptIn(ExperimentalCoroutinesApi::class)
 class DetailsViewModel @Inject constructor(
     @ApplicationContext context: Context,
     @CoroutinesScopesModule.ApplicationScope private val coroutineScope: CoroutineScope,
     private val userDetailsUseCase: UserDetailsUseCase,
-    private val uiModeRepo: UIModeRepo,
-    private val favoritesRepo: FavoritesRepo
+    private val uiModeRepo: ChangeUIModeUseCase,
+    private val favoritesRepo: ManageFavoritesUseCase,
 ) : ViewModel() {
+
     private val resources: Resources = context.resources
+
+    private val userDetailsFlow: MutableStateFlow<Resource<GitHubUserDetails>> =
+        MutableStateFlow(Resource.Loading)
 
     val isDarkModeEnabled: Flow<Boolean> = uiModeRepo.isDarkUIMode
 
-    fun addToFavorites(user: GitHubUser) = coroutineScope.launch {
-        favoritesRepo.addFavorite(user)
+    val isUserAFavorite: Flow<Boolean> = favoritesRepo.getAllFlow()
+        .combine(userDetailsFlow) { list: List<GitHubUser>, githubUserResource: Resource<GitHubUserDetails> ->
+            when (githubUserResource) {
+                is Resource.Success -> {
+                    val userDetails = githubUserResource.data
+                    list.contains(userDetails.toGitHubUser())
+                }
+                else -> false
+            }
+        }
+
+    fun setUser(user: GitHubUser?) = coroutineScope.launch(IO) {
+        userDetailsFlow.value =
+            if (user != null) Resource.Success(getDetails(user))
+            else Resource.Error(resources.getString(R.string.unknown_error_message))
     }
 
-    private suspend fun getDetails(gitHubUser: GitHubUser): GitHubUserDetails {
-        return userDetailsUseCase.getUserDetails(gitHubUser.login)
-    }
+    fun toggleFavoriteStatus(githubUserDetails: GitHubUserDetails, isFavorite: Boolean) =
+        if (isFavorite) {
+            favoritesRepo.removeFavorite(githubUserDetails.toGitHubUser())
+        } else {
+            favoritesRepo.addFavorite(githubUserDetails.toGitHubUser())
+        }
+
+    private suspend fun getDetails(gitHubUser: GitHubUser): GitHubUserDetails =
+        userDetailsUseCase.getUserDetails(gitHubUser.login)
 
     /**
      * This will try to get the details of user passed and then emit the Success UI state
      * else it will emit Error UI state in case an exception is thrown
      * */
-    fun createDetailsUIStateFlow(
-        githubUserDetails: GitHubUser?
-    ) = flow {
-        emit(DetailsUIState.Loading)
-        try {
-            // For making sure the GitHub user object is not null. This state should never be
-            if (githubUserDetails == null)
-                throw IllegalStateException(resources.getString(R.string.unknown_error_message))
-
-            val details = getDetails(githubUserDetails)
-            emit(DetailsUIState.Success(details))
-        } catch (e: Exception) {
-            emit(
-                DetailsUIState.Error(
-                    e.message ?: resources.getString(R.string.unknown_error_message)
-                )
-            )
+    val detailsUIStateFlow = channelFlow {
+        send(DetailsUIState.Loading)
+        userDetailsFlow.collect { userResource ->
+            when (userResource) {
+                is Resource.Success -> send(DetailsUIState.Success(userResource.data))
+                Resource.Loading -> send(DetailsUIState.Loading)
+                is Resource.Error -> send(DetailsUIState.Error(userResource.message))
+            }
         }
     }
 

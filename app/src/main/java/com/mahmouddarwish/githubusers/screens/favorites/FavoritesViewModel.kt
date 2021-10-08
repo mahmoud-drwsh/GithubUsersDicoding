@@ -4,39 +4,43 @@ import android.content.Context
 import android.content.res.Resources
 import androidx.lifecycle.ViewModel
 import com.mahmouddarwish.githubusers.R
-import com.mahmouddarwish.githubusers.data.datastore.UIModeRepo
-import com.mahmouddarwish.githubusers.data.room.FavoritesRepo
 import com.mahmouddarwish.githubusers.domain.models.GitHubUser
+import com.mahmouddarwish.githubusers.domain.use_cases.ChangeUIModeUseCase
+import com.mahmouddarwish.githubusers.domain.use_cases.ManageFavoritesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.collect
 import javax.inject.Inject
 
 @HiltViewModel
+@OptIn(ExperimentalCoroutinesApi::class)
 class FavoritesViewModel @Inject constructor(
-    private val repo: FavoritesRepo,
-    private val uiRepo: UIModeRepo,
+    private val repo: ManageFavoritesUseCase,
+    private val uiRepo: ChangeUIModeUseCase,
     @ApplicationContext context: Context,
 ) : ViewModel() {
     private val resources: Resources = context.resources
 
     val darkModeEnabled: Flow<Boolean> = uiRepo.isDarkUIMode
 
-    val favoritesUIState: Flow<FavoritesUIStates> = flow {
-        emit(FavoritesUIStates.Loading)
+    val favoritesUIState: Flow<FavoritesUIStates> = channelFlow {
+        send(FavoritesUIStates.Loading)
+
         try {
-            val users = withContext(IO) { repo.getAll() }
-            if (users.isNotEmpty())
-                emit(FavoritesUIStates.Populated(users))
-            else
-                emit(FavoritesUIStates.Error(resources.getString(R.string.no_favorites_message)))
+            repo.getAllFlow().collect { users ->
+                if (users.isNotEmpty())
+                    send(FavoritesUIStates.Populated(users))
+                else
+                    send(FavoritesUIStates.Error(resources.getString(R.string.no_favorites_message)))
+            }
         } catch (e: Exception) {
-            emit(
+            send(
                 FavoritesUIStates.Error(
-                    e.message ?: resources.getString(R.string.unknown_error_message)
+                    e.message
+                        ?: resources.getString(R.string.unknown_error_message)
                 )
             )
         }

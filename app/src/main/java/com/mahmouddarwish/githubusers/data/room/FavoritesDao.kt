@@ -18,4 +18,7 @@ interface FavoritesDao {
 
     @Query("SELECT * FROM GitHubUser ORDER BY login")
     fun getAll(): List<GitHubUser>
+
+    @Query("SELECT * FROM GitHubUser ORDER BY login")
+    fun getAllFlow(): Flow<List<GitHubUser>>
 }

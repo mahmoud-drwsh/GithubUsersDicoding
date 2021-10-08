@@ -19,11 +19,10 @@ class UIModeRepo @Inject constructor(
 ) : ChangeUIModeUseCase {
     private val dataStore: DataStore<Preferences> = context.dataStore
 
-    override val isDarkUIMode: Flow<Boolean> =
-        dataStore.data.map { preferences ->
-            val default = false /*By default the UI mode will be the day mode*/
-            preferences[enableDarkModeKey] ?: default
-        }
+    override val isDarkUIMode: Flow<Boolean> = dataStore.data.map { preferences ->
+        val default = false /*By default the UI mode will be the day mode*/
+        preferences[enableDarkModeKey] ?: default
+    }
 
     override suspend fun toggleUIMode() {
         dataStore.edit { preferences ->
