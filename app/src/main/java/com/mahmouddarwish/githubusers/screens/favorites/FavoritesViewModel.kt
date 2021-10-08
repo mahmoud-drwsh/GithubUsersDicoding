@@ -1,14 +1,11 @@
 package com.mahmouddarwish.githubusers.screens.favorites
 
-import android.content.Context
 import android.content.res.Resources
 import androidx.lifecycle.ViewModel
 import com.mahmouddarwish.githubusers.R
 import com.mahmouddarwish.githubusers.domain.models.GitHubUser
-import com.mahmouddarwish.githubusers.domain.use_cases.ChangeUIModeUseCase
 import com.mahmouddarwish.githubusers.domain.use_cases.ManageFavoritesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
@@ -19,12 +16,8 @@ import javax.inject.Inject
 @OptIn(ExperimentalCoroutinesApi::class)
 class FavoritesViewModel @Inject constructor(
     private val repo: ManageFavoritesUseCase,
-    private val uiRepo: ChangeUIModeUseCase,
-    @ApplicationContext context: Context,
+    private val resources: Resources,
 ) : ViewModel() {
-    private val resources: Resources = context.resources
-
-    val darkModeEnabled: Flow<Boolean> = uiRepo.isDarkUIMode
 
     val favoritesUIState: Flow<FavoritesUIStates> = channelFlow {
         send(FavoritesUIStates.Loading)

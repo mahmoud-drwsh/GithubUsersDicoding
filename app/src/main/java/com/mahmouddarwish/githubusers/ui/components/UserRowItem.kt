@@ -4,25 +4,22 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import com.mahmouddarwish.githubusers.Constants
+import com.mahmouddarwish.githubusers.R
 import com.mahmouddarwish.githubusers.domain.models.GitHubUser
-import com.mahmouddarwish.githubusers.screens.CoilImage
 
 @Composable
 fun UserRowItem(
     gitHubUser: GitHubUser,
     modifier: Modifier = Modifier,
-    onItemClick: (GitHubUser) -> Unit = {}
+    onItemClick: (GitHubUser) -> Unit = {},
 ) {
     Card(
         modifier = modifier
@@ -50,7 +47,7 @@ fun UserRowItem(
             ) {
                 CoilImage(
                     url = gitHubUser.avatarUrl,
-                    imageDescription = Constants.USER_AVATAR_IMAGE_DESCRIPTION
+                    imageDescription = stringResource(R.string.avatar_image_description)
                 )
             }
 

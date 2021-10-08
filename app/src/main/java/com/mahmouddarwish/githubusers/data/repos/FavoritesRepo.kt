@@ -1,6 +1,7 @@
-package com.mahmouddarwish.githubusers.data.room
+package com.mahmouddarwish.githubusers.data.repos
 
 import com.mahmouddarwish.githubusers.CoroutinesScopesModule
+import com.mahmouddarwish.githubusers.data.room.FavoritesDao
 import com.mahmouddarwish.githubusers.domain.models.GitHubUser
 import com.mahmouddarwish.githubusers.domain.use_cases.ManageFavoritesUseCase
 import kotlinx.coroutines.CoroutineScope
@@ -22,10 +23,6 @@ class FavoritesRepo @Inject constructor(
     override fun removeFavorite(favorite: GitHubUser) {
         coroutineScope.launch(IO) { dao.delete(favorite) }
     }
-
-    override suspend fun isUserAFavorite(user: GitHubUser): Boolean = dao.getAll().contains(user)
-
-    override fun getAll(): List<GitHubUser> = dao.getAll()
 
     override fun getAllFlow(): Flow<List<GitHubUser>> = dao.getAllFlow()
 }

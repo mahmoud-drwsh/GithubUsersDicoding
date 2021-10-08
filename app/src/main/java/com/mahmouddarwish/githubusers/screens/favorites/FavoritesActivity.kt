@@ -12,34 +12,38 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import com.mahmouddarwish.githubusers.R
 import com.mahmouddarwish.githubusers.navigateUp
 import com.mahmouddarwish.githubusers.screens.details.DetailsActivity
 import com.mahmouddarwish.githubusers.ui.components.CenteredLoadingMessageWithIndicator
 import com.mahmouddarwish.githubusers.ui.components.CenteredText
 import com.mahmouddarwish.githubusers.ui.components.GithubUsersList
-import com.mahmouddarwish.githubusers.ui.theme.GithubUsersTheme
+import com.mahmouddarwish.githubusers.ui.theme.GitHubUsersCustomTheme
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class FavoritesActivity : ComponentActivity() {
     val viewModel: FavoritesViewModel by viewModels()
 
+    @Inject
+    lateinit var myTheme: GitHubUsersCustomTheme
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val darkThemeEnabled by viewModel.darkModeEnabled.collectAsState(initial = false)
-
             val favoritesUIState: FavoritesViewModel.FavoritesUIStates by viewModel.favoritesUIState
                 .collectAsState(initial = FavoritesViewModel.FavoritesUIStates.Loading)
 
-            GithubUsersTheme(darkTheme = darkThemeEnabled) {
+            myTheme.GithubUsersTheme {
                 Scaffold(
                     topBar = {
-                        TopAppBar(title = { Text(text = "Favorites") },
+                        TopAppBar(title = { Text(text = getString(R.string.favorites_screen_title)) },
                             navigationIcon = {
                                 IconButton(onClick = { navigateUp() }) {
-                                    Icon(Icons.Default.ArrowBack, contentDescription = "")
+                                    Icon(Icons.Default.ArrowBack,
+                                        contentDescription = "Navigating back icon")
                                 }
                             })
                     }
@@ -47,7 +51,8 @@ class FavoritesActivity : ComponentActivity() {
                     when (favoritesUIState) {
                         FavoritesViewModel.FavoritesUIStates.Loading -> CenteredLoadingMessageWithIndicator()
                         is FavoritesViewModel.FavoritesUIStates.Error -> {
-                            val error = favoritesUIState as FavoritesViewModel.FavoritesUIStates.Error
+                            val error =
+                                favoritesUIState as FavoritesViewModel.FavoritesUIStates.Error
                             CenteredText(text = error.message)
                         }
                         is FavoritesViewModel.FavoritesUIStates.Populated -> {

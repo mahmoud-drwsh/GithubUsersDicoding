@@ -1,19 +1,15 @@
 package com.mahmouddarwish.githubusers.screens.details
 
-import android.content.Context
 import android.content.res.Resources
 import androidx.lifecycle.ViewModel
 import com.mahmouddarwish.githubusers.CoroutinesScopesModule
 import com.mahmouddarwish.githubusers.R
 import com.mahmouddarwish.githubusers.Resource
-import com.mahmouddarwish.githubusers.data.datastore.UIModeRepo
 import com.mahmouddarwish.githubusers.domain.models.GitHubUser
 import com.mahmouddarwish.githubusers.domain.models.GitHubUserDetails
-import com.mahmouddarwish.githubusers.domain.use_cases.ChangeUIModeUseCase
 import com.mahmouddarwish.githubusers.domain.use_cases.ManageFavoritesUseCase
 import com.mahmouddarwish.githubusers.domain.use_cases.UserDetailsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -24,19 +20,14 @@ import javax.inject.Inject
 @HiltViewModel
 @OptIn(ExperimentalCoroutinesApi::class)
 class DetailsViewModel @Inject constructor(
-    @ApplicationContext context: Context,
     @CoroutinesScopesModule.ApplicationScope private val coroutineScope: CoroutineScope,
     private val userDetailsUseCase: UserDetailsUseCase,
-    private val uiModeRepo: ChangeUIModeUseCase,
     private val favoritesRepo: ManageFavoritesUseCase,
+    private val resources: Resources,
 ) : ViewModel() {
-
-    private val resources: Resources = context.resources
 
     private val userDetailsFlow: MutableStateFlow<Resource<GitHubUserDetails>> =
         MutableStateFlow(Resource.Loading)
-
-    val isDarkModeEnabled: Flow<Boolean> = uiModeRepo.isDarkUIMode
 
     val isUserAFavorite: Flow<Boolean> = favoritesRepo.getAllFlow()
         .combine(userDetailsFlow) { list: List<GitHubUser>, githubUserResource: Resource<GitHubUserDetails> ->

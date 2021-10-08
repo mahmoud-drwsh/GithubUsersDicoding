@@ -7,16 +7,6 @@ import android.net.Uri
 import android.widget.Toast
 
 /**
- * The Constants used throughout the app
- * */
-object Constants {
-    /**
-     * A generic error message
-     * */
-    const val USER_AVATAR_IMAGE_DESCRIPTION = "The user's avatar image"
-}
-
-/**
  * For opening a url in a browser. In case of an error, a toast is displayed notifying the user
  * */
 fun Context.openWebPage(url: String) {
@@ -49,7 +39,7 @@ fun Context.shareText(url: String) {
 /**
  * Returns the string if it's not `null` or empty else return the default string provided.
  * */
-fun String?.orDefault(default: String) = if (!this.isNullOrBlank()) this else default
+fun String?.orDefault(default: String) = if (this.isNullOrBlank()) default else this
 
 /**
  *
@@ -60,7 +50,7 @@ fun String?.orDefault(default: String) = if (!this.isNullOrBlank()) this else de
  * */
 fun Activity.navigateUp() = finish()
 
-sealed class Resource<out T>() {
+sealed class Resource<out T> {
     object Loading : Resource<Nothing>()
     class Error(val message: String) : Resource<Nothing>()
     class Success<T>(val data: T) : Resource<T>()

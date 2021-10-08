@@ -1,17 +1,21 @@
 package com.mahmouddarwish.githubusers
 
 import android.content.Context
+import android.content.res.Resources
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.room.Room
-import com.mahmouddarwish.githubusers.data.datastore.UIModeRepo
+import com.mahmouddarwish.githubusers.data.datastore.dataStore
 import com.mahmouddarwish.githubusers.data.network.api.Constants.API_BASE_URL
 import com.mahmouddarwish.githubusers.data.network.api.GitHubService
 import com.mahmouddarwish.githubusers.data.network.api.okHttpClient
-import com.mahmouddarwish.githubusers.data.network.repos.GitHubUserRepo
-import com.mahmouddarwish.githubusers.data.network.repos.UsersSearchRepo
+import com.mahmouddarwish.githubusers.data.repos.FavoritesRepo
+import com.mahmouddarwish.githubusers.data.repos.GitHubUserRepo
+import com.mahmouddarwish.githubusers.data.repos.UILightModeRepo
+import com.mahmouddarwish.githubusers.data.repos.UsersSearchRepo
 import com.mahmouddarwish.githubusers.data.room.FavoritesDao
-import com.mahmouddarwish.githubusers.data.room.FavoritesRepo
 import com.mahmouddarwish.githubusers.data.room.FavoritesRoomDatabase
-import com.mahmouddarwish.githubusers.domain.use_cases.ChangeUIModeUseCase
+import com.mahmouddarwish.githubusers.domain.use_cases.ChangeUILightModeUseCase
 import com.mahmouddarwish.githubusers.domain.use_cases.ManageFavoritesUseCase
 import com.mahmouddarwish.githubusers.domain.use_cases.SearchUseCase
 import com.mahmouddarwish.githubusers.domain.use_cases.UserDetailsUseCase
@@ -61,7 +65,7 @@ object AppHiltModule {
 
     @Singleton
     @Provides
-    fun provideUIModeRepo(uiModeRepo: UIModeRepo): ChangeUIModeUseCase = uiModeRepo
+    fun provideUIModeRepo(uiModeRepo: UILightModeRepo): ChangeUILightModeUseCase = uiModeRepo
 
     @Singleton
     @Provides
@@ -74,6 +78,15 @@ object AppHiltModule {
     fun provideFavoritesDao(favoritesRoomDatabase: FavoritesRoomDatabase): FavoritesDao {
         return favoritesRoomDatabase.FavoritesDao()
     }
+
+    @Singleton
+    @Provides
+    fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+        context.dataStore
+
+    @Singleton
+    @Provides
+    fun provideAppResources(@ApplicationContext context: Context): Resources = context.resources
 }
 
 

@@ -1,4 +1,4 @@
-package com.mahmouddarwish.githubusers.data.network.repos
+package com.mahmouddarwish.githubusers.data.repos
 
 import com.mahmouddarwish.githubusers.domain.models.GitHubUser
 import com.mahmouddarwish.githubusers.domain.models.GitHubUserDetails

@@ -37,26 +37,24 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
 import com.mahmouddarwish.githubusers.*
-import com.mahmouddarwish.githubusers.Constants.USER_AVATAR_IMAGE_DESCRIPTION
 import com.mahmouddarwish.githubusers.R
 import com.mahmouddarwish.githubusers.domain.models.GitHubUser
 import com.mahmouddarwish.githubusers.domain.models.GitHubUserDetails
-import com.mahmouddarwish.githubusers.screens.CoilImage
+import com.mahmouddarwish.githubusers.ui.components.CoilImage
 import com.mahmouddarwish.githubusers.ui.components.CenteredLoadingMessageWithIndicator
 import com.mahmouddarwish.githubusers.ui.components.CenteredText
 import com.mahmouddarwish.githubusers.ui.components.GithubUsersList
-import com.mahmouddarwish.githubusers.ui.theme.GithubUsersTheme
+import com.mahmouddarwish.githubusers.ui.theme.GitHubUsersCustomTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class DetailsActivity : ComponentActivity() {
     private val viewModel by viewModels<DetailsViewModel>()
 
-
+    @Inject
+    lateinit var myTheme: GitHubUsersCustomTheme
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,9 +65,7 @@ class DetailsActivity : ComponentActivity() {
             val detailsUIState: DetailsViewModel.DetailsUIState by viewModel.detailsUIStateFlow
                 .collectAsState(initial = DetailsViewModel.DetailsUIState.Loading)
 
-            val darkThemeEnabled by viewModel.isDarkModeEnabled.collectAsState(initial = false)
-
-            GithubUsersTheme(darkThemeEnabled) {
+            myTheme.GithubUsersTheme {
                 DetailsScreen(detailsUIState)
             }
         }
@@ -215,14 +211,16 @@ class DetailsActivity : ComponentActivity() {
                     viewModel.toggleFavoriteStatus(githubUserDetails, isFavorite)
                     Toast.makeText(
                         this,
-                        if (isFavorite) "Removing from favorites" else "Adding to favorites",
+                        if (isFavorite) resources.getString(R.string.removing_favorite_toast_message)
+                        else resources.getString(R.string.adding_favorite_toast_message),
                         Toast.LENGTH_SHORT
                     ).show()
                 }) {
                     val icon =
                         if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder
 
-                    Icon(icon, contentDescription = "")
+                    Icon(icon,
+                        contentDescription = stringResource(R.string.floating_action_button_icon_description))
                 }
             }
         ) { paddingValues ->
@@ -245,7 +243,7 @@ class DetailsActivity : ComponentActivity() {
                 ) {
                     CoilImage(
                         url = githubUserDetails.avatarUrl,
-                        imageDescription = USER_AVATAR_IMAGE_DESCRIPTION,
+                        imageDescription = getString(R.string.avatar_image_description),
                         modifier = modifier
                     )
                 }
@@ -278,9 +276,6 @@ class DetailsActivity : ComponentActivity() {
                         /**
                          * Following and followers row
                          * */
-                        /**
-                         * Following and followers row
-                         * */
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = spacedBy(4.dp),
@@ -289,7 +284,7 @@ class DetailsActivity : ComponentActivity() {
                         ) {
                             Icon(
                                 Icons.Outlined.People,
-                                contentDescription = "Icon for people following and the followers"
+                                contentDescription = stringResource(R.string.following_and_the_followers_icon_description)
                             )
                             Text(
                                 text = stringResource(
@@ -316,18 +311,12 @@ class DetailsActivity : ComponentActivity() {
                         /**
                          * Repositories
                          * */
-                        /**
-                         * Repositories
-                         * */
                         Text(text = buildAnnotatedString {
                             withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                                 append(stringResource(R.string.repositories))
                             }
                             append(githubUserDetails.publicRepos.toString())
                         })
-                        /**
-                         * Gists
-                         * */
                         /**
                          * Gists
                          * */
@@ -340,18 +329,12 @@ class DetailsActivity : ComponentActivity() {
                         /**
                          * Company
                          * */
-                        /**
-                         * Company
-                         * */
                         Text(text = buildAnnotatedString {
                             withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                                 append(stringResource(R.string.company))
                             }
                             append(githubUserDetails.company.orDefault(stringResource(id = R.string.undefined_by_user)))
                         })
-                        /**
-                         * Location
-                         * */
                         /**
                          * Location
                          * */
@@ -364,18 +347,12 @@ class DetailsActivity : ComponentActivity() {
                         /**
                          * Joining date
                          * */
-                        /**
-                         * Joining date
-                         * */
                         Text(text = buildAnnotatedString {
                             withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                                 append(stringResource(R.string.joined))
                             }
                             append(githubUserDetails.createdAt.substring(0..9))
                         })
-                        /**
-                         * Bio
-                         * */
                         /**
                          * Bio
                          * */
@@ -424,7 +401,8 @@ class DetailsActivity : ComponentActivity() {
                     // ending the activity and going back to the previous one.
                     navigateUp()
                 }) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Navigating back icon")
+                    Icon(Icons.Default.ArrowBack,
+                        contentDescription = stringResource(R.string.navigating_back_icon))
                 }
             },
             actions = {
@@ -432,7 +410,8 @@ class DetailsActivity : ComponentActivity() {
                     // Share the user profile link
                     shareText(githubUserDetails.htmlUrl)
                 }) {
-                    Icon(Icons.Default.Share, contentDescription = "Share profile link icon")
+                    Icon(Icons.Default.Share,
+                        contentDescription = stringResource(R.string.share_icon))
                 }
             }
         )

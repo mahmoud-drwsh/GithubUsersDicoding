@@ -1,12 +1,10 @@
-package com.mahmouddarwish.githubusers.data.datastore
+package com.mahmouddarwish.githubusers.data.repos
 
-import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import com.mahmouddarwish.githubusers.data.datastore.Constants.enableDarkModeKey
-import com.mahmouddarwish.githubusers.domain.use_cases.ChangeUIModeUseCase
-import dagger.hilt.android.qualifiers.ApplicationContext
+import com.mahmouddarwish.githubusers.domain.use_cases.ChangeUILightModeUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -14,10 +12,9 @@ import javax.inject.Singleton
 
 
 @Singleton
-class UIModeRepo @Inject constructor(
-    @ApplicationContext context: Context
-) : ChangeUIModeUseCase {
-    private val dataStore: DataStore<Preferences> = context.dataStore
+class UILightModeRepo @Inject constructor(
+    private val dataStore: DataStore<Preferences>
+) : ChangeUILightModeUseCase {
 
     override val isDarkUIMode: Flow<Boolean> = dataStore.data.map { preferences ->
         val default = false /*By default the UI mode will be the day mode*/

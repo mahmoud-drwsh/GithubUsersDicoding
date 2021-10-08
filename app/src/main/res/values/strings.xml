@@ -19,10 +19,22 @@
     <string name="bio">"Bio: "</string>
     <string name="search">Search</string>
     <string name="name">Name</string>
-    <string name="home_title">GitHub Users</string>
+    <string name="home_title">@string/app_name</string>
     <string name="loading">Loading</string>
     <string name="unable_to_open_webpage">Unable to open the webpage</string>
     <string name="error_unable_to_share">Unable to share due to an error</string>
     <string name="title_activity_favorites">FavoritesActivity</string>
     <string name="no_favorites_message">There are none that have been added</string>
+    <string name="removing_favorite_toast_message">Removing from favorites</string>
+    <string name="adding_favorite_toast_message">Adding to favorites</string>
+    <string name="floating_action_button_icon_description">Toggling favorite state icon for the floating action button</string>
+    <string name="following_and_the_followers_icon_description">Icon for people following and the followers</string>
+    <string name="favorites_screen_title">Favorites</string>
+    <string name="ui_light_mode_toggling_icon">toggle UI mode to either the day or the dark mode</string>
+    <string name="favorite_screens_icon">Favorites screen icon</string>
+    <string name="search_field_icon">Search field icon</string>
+    <string name="clear_search_query_icon">Clear search field icon</string>
+    <string name="avatar_image_description">The user\'s avatar image</string>
+    <string name="navigating_back_icon">Navigating back icon</string>
+    <string name="share_icon">Share profile link icon</string>
 </resources>

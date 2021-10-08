@@ -22,10 +22,9 @@ import javax.inject.Singleton
 object CoroutinesScopesModule {
 
     @ApplicationScope
-    @Singleton // Provide always the same instance
+    @Singleton
     @Provides
     fun providesCoroutineScope(): CoroutineScope {
-        // Run this code when providing an instance of CoroutineScope
         return CoroutineScope(SupervisorJob() + Dispatchers.Default)
     }
 

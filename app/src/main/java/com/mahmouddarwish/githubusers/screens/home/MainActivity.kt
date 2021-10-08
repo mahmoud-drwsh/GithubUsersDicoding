@@ -42,9 +42,10 @@ import com.mahmouddarwish.githubusers.screens.home.HomeViewModel.HomeUIState
 import com.mahmouddarwish.githubusers.ui.components.CenteredLoadingMessageWithIndicator
 import com.mahmouddarwish.githubusers.ui.components.CenteredText
 import com.mahmouddarwish.githubusers.ui.components.GithubUsersList
-import com.mahmouddarwish.githubusers.ui.theme.GithubUsersTheme
+import com.mahmouddarwish.githubusers.ui.theme.GitHubUsersCustomTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * In this screen, a list of users and their names, ID's, and short bios are displayed.
@@ -59,6 +60,9 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     private val viewModel: HomeViewModel by viewModels()
 
+    @Inject
+    lateinit var myGitHubUsersCustomTheme: GitHubUsersCustomTheme
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -69,10 +73,16 @@ class MainActivity : ComponentActivity() {
         setContent {
             val uiState by viewModel.homeUIStateFlow.collectAsState(initial = HomeUIState.Loading)
 
-            val darkUIMode: Boolean by viewModel.dayUIModeEnabledFlow.collectAsState(initial = false)
+            val darkUIModeEnabled by myGitHubUsersCustomTheme
+                .isDarkUIMode
+                .collectAsState(initial = false)
 
-            GithubUsersTheme(darkTheme = darkUIMode) {
-                HomeScreen(uiState = uiState, darkUIModeEnabled = darkUIMode) { githubUserData ->
+            myGitHubUsersCustomTheme.GithubUsersTheme {
+
+                HomeScreen(
+                    uiState = uiState,
+                    darkUIModeEnabled = darkUIModeEnabled
+                ) { githubUserData ->
                     navigateToDetailsActivity(githubUserData)
                 }
             }
@@ -104,14 +114,17 @@ class MainActivity : ComponentActivity() {
 
                             Icon(
                                 icon,
-                                contentDescription = "toggle UI mode to either the day or the dark mode"
+                                contentDescription = stringResource(R.string.ui_light_mode_toggling_icon)
                             )
                         }
 
                         IconButton(onClick = {
                             navigateToFavoritesActivity()
                         }) {
-                            Icon(Icons.Default.Favorite, contentDescription = "")
+                            Icon(
+                                Icons.Default.Favorite,
+                                contentDescription = stringResource(R.string.favorite_screens_icon)
+                            )
                         }
                     })
             }
@@ -162,14 +175,15 @@ class MainActivity : ComponentActivity() {
                     .border(BorderStroke(1.dp, Color.LightGray), CircleShape),
                 singleLine = true,
                 leadingIcon = {
-                    Icon(Icons.Default.Search, contentDescription = "Search field icon")
+                    Icon(Icons.Default.Search,
+                        contentDescription = stringResource(R.string.search_field_icon))
                 },
                 trailingIcon = {
                     if (queryString.isNotEmpty())
                         IconButton(onClick = { viewModel.setQuery(("")) }) {
                             Icon(
                                 Icons.Outlined.Clear,
-                                contentDescription = "Clear search field icon"
+                                contentDescription = stringResource(R.string.clear_search_query_icon)
                             )
                         }
                 },
@@ -189,7 +203,7 @@ class MainActivity : ComponentActivity() {
     }
 
     companion object {
-        private fun MainActivity.navigateToDetailsActivity(githubUserDetails: GitHubUser) {
+        internal fun MainActivity.navigateToDetailsActivity(githubUserDetails: GitHubUser) {
             val intent = DetailsActivity.createIntentWithGithubUserData(this, githubUserDetails)
             startActivity(intent)
         }

@@ -1,14 +1,12 @@
 package com.mahmouddarwish.githubusers.screens.home
 
-import android.content.Context
 import android.content.res.Resources
 import androidx.lifecycle.ViewModel
 import com.mahmouddarwish.githubusers.R
 import com.mahmouddarwish.githubusers.domain.models.GitHubUser
-import com.mahmouddarwish.githubusers.domain.use_cases.ChangeUIModeUseCase
+import com.mahmouddarwish.githubusers.domain.use_cases.ChangeUILightModeUseCase
 import com.mahmouddarwish.githubusers.domain.use_cases.SearchUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import retrofit2.HttpException
@@ -17,20 +15,16 @@ import javax.inject.Inject
 @HiltViewModel
 @OptIn(FlowPreview::class)
 class HomeViewModel @Inject constructor(
-    @ApplicationContext context: Context,
+    private val resources: Resources,
     private val searchRepo: SearchUseCase,
-    private val uiModeRepo: ChangeUIModeUseCase,
+    private val uiLightModeRepo: ChangeUILightModeUseCase,
 ) : ViewModel() {
 
-    private val resources: Resources = context.resources
-
-    private val _searchQuery: MutableStateFlow<String> = MutableStateFlow("0")
+    private val _searchQuery: MutableStateFlow<String> = MutableStateFlow("")
     val searchQuery: StateFlow<String>
         get() = _searchQuery
 
-    val dayUIModeEnabledFlow: Flow<Boolean> = uiModeRepo.isDarkUIMode
-
-    suspend fun toggleUIMode() = uiModeRepo.toggleUIMode()
+    suspend fun toggleUIMode() = uiLightModeRepo.toggleUIMode()
 
     /**
      * This flow will emit new search results as soon as searchQuery changes with a delay in order to
