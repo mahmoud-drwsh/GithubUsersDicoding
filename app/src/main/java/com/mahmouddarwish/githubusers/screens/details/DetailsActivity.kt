@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.rememberScrollState
@@ -76,7 +77,9 @@ class DetailsActivity : ComponentActivity() {
         when (detailsUIState) {
             is DetailsViewModel.DetailsUIState.Error -> CenteredText(text = detailsUIState.message)
             is DetailsViewModel.DetailsUIState.Success -> DetailsScreenContent(detailsUIState)
-            DetailsViewModel.DetailsUIState.Loading -> CenteredLoadingMessageWithIndicator()
+            DetailsViewModel.DetailsUIState.Loading -> CenteredLoadingMessageWithIndicator(
+                Modifier.background(MaterialTheme.colors.surface)
+            )
         }
 
 
@@ -123,7 +126,7 @@ class DetailsActivity : ComponentActivity() {
         }
 
         Column(Modifier.padding(paddingValues)) {
-            val pagerState = rememberPagerState(pageCount = tabs.size)
+            val pagerState = rememberPagerState(0)
 
             TabRow(
                 selectedTabIndex = pagerState.currentPage,
@@ -149,6 +152,7 @@ class DetailsActivity : ComponentActivity() {
             }
 
             HorizontalPager(
+                count = 3,
                 verticalAlignment = Alignment.Top,
                 state = pagerState,
                 modifier = Modifier
