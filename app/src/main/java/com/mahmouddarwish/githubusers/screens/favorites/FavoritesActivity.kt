@@ -15,6 +15,7 @@ import androidx.compose.runtime.getValue
 import com.mahmouddarwish.githubusers.R
 import com.mahmouddarwish.githubusers.navigateUp
 import com.mahmouddarwish.githubusers.screens.details.DetailsActivity
+import com.mahmouddarwish.githubusers.screens.favorites.FavoritesViewModel.*
 import com.mahmouddarwish.githubusers.ui.components.CenteredLoadingMessageWithIndicator
 import com.mahmouddarwish.githubusers.ui.components.CenteredText
 import com.mahmouddarwish.githubusers.ui.components.GithubUsersList
@@ -33,8 +34,8 @@ class FavoritesActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val favoritesUIState: FavoritesViewModel.FavoritesUIStates by viewModel.favoritesUIState
-                .collectAsState(initial = FavoritesViewModel.FavoritesUIStates.Loading)
+            val favoritesUIState: FavoritesUIStates by viewModel.favoritesUIState
+                .collectAsState(initial = FavoritesUIStates.Loading)
 
             myTheme.GithubUsersTheme {
                 Scaffold(
@@ -49,15 +50,13 @@ class FavoritesActivity : ComponentActivity() {
                     }
                 ) {
                     when (favoritesUIState) {
-                        FavoritesViewModel.FavoritesUIStates.Loading -> CenteredLoadingMessageWithIndicator()
-                        is FavoritesViewModel.FavoritesUIStates.Error -> {
-                            val error =
-                                favoritesUIState as FavoritesViewModel.FavoritesUIStates.Error
+                        FavoritesUIStates.Loading -> CenteredLoadingMessageWithIndicator()
+                        is Error -> {
+                            val error = favoritesUIState as FavoritesUIStates.Error
                             CenteredText(text = error.message)
                         }
-                        is FavoritesViewModel.FavoritesUIStates.Populated -> {
-                            val populated =
-                                favoritesUIState as FavoritesViewModel.FavoritesUIStates.Populated
+                        is FavoritesUIStates.Populated -> {
+                            val populated = favoritesUIState as FavoritesUIStates.Populated
                             FavoritesScreenContent(populated)
                         }
                     }
@@ -67,7 +66,7 @@ class FavoritesActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun FavoritesScreenContent(populated: FavoritesViewModel.FavoritesUIStates.Populated) {
+    private fun FavoritesScreenContent(populated: FavoritesUIStates.Populated) {
         GithubUsersList(users = populated.users) { gitHubUser ->
             val intent =
                 DetailsActivity.createIntentWithGithubUserData(this, gitHubUser)

@@ -41,9 +41,13 @@ import com.mahmouddarwish.githubusers.*
 import com.mahmouddarwish.githubusers.R
 import com.mahmouddarwish.githubusers.domain.models.GitHubUser
 import com.mahmouddarwish.githubusers.domain.models.GitHubUserDetails
-import com.mahmouddarwish.githubusers.ui.components.CoilImage
+import com.mahmouddarwish.githubusers.screens.details.DetailsActivity.DetailsScreenTabs.*
+import com.mahmouddarwish.githubusers.screens.details.DetailsViewModel.DetailsUIState
+import com.mahmouddarwish.githubusers.screens.details.DetailsViewModel.PeopleUIState
+import com.mahmouddarwish.githubusers.screens.details.DetailsViewModel.PeopleUIState.*
 import com.mahmouddarwish.githubusers.ui.components.CenteredLoadingMessageWithIndicator
 import com.mahmouddarwish.githubusers.ui.components.CenteredText
+import com.mahmouddarwish.githubusers.ui.components.CoilImage
 import com.mahmouddarwish.githubusers.ui.components.GithubUsersList
 import com.mahmouddarwish.githubusers.ui.theme.GitHubUsersCustomTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -63,8 +67,8 @@ class DetailsActivity : ComponentActivity() {
         viewModel.setUser(extractPassedGithubUser())
 
         setContent {
-            val detailsUIState: DetailsViewModel.DetailsUIState by viewModel.detailsUIStateFlow
-                .collectAsState(initial = DetailsViewModel.DetailsUIState.Loading)
+            val detailsUIState: DetailsUIState by viewModel.detailsUIStateFlow
+                .collectAsState(initial = DetailsUIState.Loading)
 
             myTheme.GithubUsersTheme {
                 DetailsScreen(detailsUIState)
@@ -73,25 +77,25 @@ class DetailsActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun DetailsScreen(detailsUIState: DetailsViewModel.DetailsUIState) =
+    private fun DetailsScreen(detailsUIState: DetailsUIState) =
         when (detailsUIState) {
-            is DetailsViewModel.DetailsUIState.Error -> CenteredText(text = detailsUIState.message)
-            is DetailsViewModel.DetailsUIState.Success -> DetailsScreenContent(detailsUIState)
-            DetailsViewModel.DetailsUIState.Loading -> CenteredLoadingMessageWithIndicator(
+            is DetailsUIState.Error -> CenteredText(text = detailsUIState.message)
+            is DetailsUIState.Success -> DetailsScreenContent(detailsUIState)
+            is DetailsUIState.Loading -> CenteredLoadingMessageWithIndicator(
                 Modifier.background(MaterialTheme.colors.surface)
             )
         }
 
 
     @Composable
-    private fun DetailsScreenContent(detailsUIState: DetailsViewModel.DetailsUIState.Success) {
+    private fun DetailsScreenContent(detailsUIState: DetailsUIState.Success) {
         val user = detailsUIState.gitHubUserDetails
 
         val followersUIState by viewModel.getFollowers(user.login)
-            .collectAsState(initial = DetailsViewModel.PeopleUIState.Loading)
+            .collectAsState(initial = Loading)
 
         val followingUIState by viewModel.getFollowing(user.login)
-            .collectAsState(initial = DetailsViewModel.PeopleUIState.Loading)
+            .collectAsState(initial = Loading)
 
         Scaffold(
             topBar = {
@@ -114,14 +118,14 @@ class DetailsActivity : ComponentActivity() {
     private fun DetailsScreenScaffoldContent(
         paddingValues: PaddingValues,
         githubUser: GitHubUserDetails,
-        followingUIState: DetailsViewModel.PeopleUIState,
-        followersUIState: DetailsViewModel.PeopleUIState,
+        followingUIState: PeopleUIState,
+        followersUIState: PeopleUIState,
     ) {
         val tabs = remember {
             listOf(
-                DetailsScreenTabs.Details,
-                DetailsScreenTabs.Following,
-                DetailsScreenTabs.Followers
+                Details,
+                Followers,
+                Following
             )
         }
 
@@ -152,7 +156,7 @@ class DetailsActivity : ComponentActivity() {
             }
 
             HorizontalPager(
-                count = 3,
+                count = tabs.size,
                 verticalAlignment = Alignment.Top,
                 state = pagerState,
                 modifier = Modifier
@@ -160,9 +164,9 @@ class DetailsActivity : ComponentActivity() {
                     .fillMaxSize()
             ) { tabIndex: Int ->
                 when (tabs[tabIndex]) {
-                    DetailsScreenTabs.Details -> UserDetailsTabPage(githubUserDetails = githubUser)
-                    DetailsScreenTabs.Followers -> FollowersTabPage(followersUIState = followersUIState)
-                    DetailsScreenTabs.Following -> FollowingTabPage(followingUIState = followingUIState)
+                    Details -> UserDetailsTabPage(githubUserDetails = githubUser)
+                    Followers -> FollowersTabPage(followersUIState = followersUIState)
+                    Following -> FollowingTabPage(followingUIState = followingUIState)
                 }
             }
         }
@@ -171,32 +175,32 @@ class DetailsActivity : ComponentActivity() {
     @Composable
     private fun FollowersTabPage(
         modifier: Modifier = Modifier,
-        followersUIState: DetailsViewModel.PeopleUIState,
+        followersUIState: PeopleUIState,
     ) = when (followersUIState) {
-        is DetailsViewModel.PeopleUIState.Error -> CenteredText(
+        is Error -> CenteredText(
             text = followersUIState.message,
             modifier = modifier
         )
-        is DetailsViewModel.PeopleUIState.Success -> GithubUsersList(
+        is Success -> GithubUsersList(
             users = followersUIState.users,
             modifier = modifier.fillMaxSize()
         )
-        DetailsViewModel.PeopleUIState.Loading -> CenteredLoadingMessageWithIndicator(modifier)
+        Loading -> CenteredLoadingMessageWithIndicator(modifier)
     }
 
     @Composable
     private fun FollowingTabPage(
         modifier: Modifier = Modifier,
-        followingUIState: DetailsViewModel.PeopleUIState,
+        followingUIState: PeopleUIState,
     ) {
         when (followingUIState) {
-            is DetailsViewModel.PeopleUIState.Error -> {
+            is Error -> {
                 CenteredText(text = followingUIState.message, modifier = modifier)
             }
-            is DetailsViewModel.PeopleUIState.Success -> {
+            is Success -> {
                 GithubUsersList(users = followingUIState.users, modifier = modifier.fillMaxSize())
             }
-            DetailsViewModel.PeopleUIState.Loading -> {
+            Loading -> {
                 CenteredLoadingMessageWithIndicator(modifier)
             }
         }
@@ -223,8 +227,10 @@ class DetailsActivity : ComponentActivity() {
                     val icon =
                         if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder
 
-                    Icon(icon,
-                        contentDescription = stringResource(R.string.floating_action_button_icon_description))
+                    Icon(
+                        icon,
+                        contentDescription = stringResource(R.string.floating_action_button_icon_description)
+                    )
                 }
             }
         ) { paddingValues ->
@@ -405,8 +411,10 @@ class DetailsActivity : ComponentActivity() {
                     // ending the activity and going back to the previous one.
                     navigateUp()
                 }) {
-                    Icon(Icons.Default.ArrowBack,
-                        contentDescription = stringResource(R.string.navigating_back_icon))
+                    Icon(
+                        Icons.Default.ArrowBack,
+                        contentDescription = stringResource(R.string.navigating_back_icon)
+                    )
                 }
             },
             actions = {
@@ -414,8 +422,10 @@ class DetailsActivity : ComponentActivity() {
                     // Share the user profile link
                     shareText(githubUserDetails.htmlUrl)
                 }) {
-                    Icon(Icons.Default.Share,
-                        contentDescription = stringResource(R.string.share_icon))
+                    Icon(
+                        Icons.Default.Share,
+                        contentDescription = stringResource(R.string.share_icon)
+                    )
                 }
             }
         )
