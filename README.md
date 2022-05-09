@@ -1,15 +1,17 @@
-# Notes
-I have used the Compose version of the required UI components.
+# Introduction   
 
-Please make sure that the very latest Android studio is used to compile the code.
+Since GitHub API tokens are revoked automatically when uploaded to GitHub, I have included some screenshots and a video demonstrating how the app looks and is used. To build the app and run yourself, you'll need to generate a token yourself and place it in the gradle.properties file in the root directory of the project.
 
-I have tried my best to follow the MVVM architecture pattern, and I would love to be advised on how I can improve the app's architecture.
+# Screenshots
 
-Most of the code I wrote is self-explanatory especially since I am using Compose, but still, I have added comments where I felt needed.
+|<img src="screenshots/Screenshot_20220509_162348.png" width=256> |<img src="screenshots/Screenshot_20220509_162428.png" width=256> |<img src="screenshots/Screenshot_20220509_162436.png" width=256> |
+|:-|-|-|
+|<img src="screenshots/Screenshot_20220509_162453.png" width=256> |<img src="screenshots/Screenshot_20220509_162504.png" width=256> | <img src="screenshots/Screenshot_20220509_162448.png" width=256> |
 
-Since there is no prohibition regarding the use of experimental libraries, the app uses some experimental libraries for the sake of making code-reading easier. I am aware of the existence of stable alternatives.
+# Demo
 
-Improvements can be made, especially to the app architecture.
+The following video is a short one demonstrating how the app is used.
+https://youtube.com/shorts/cI1nRTRW8qM
 
 
 # The following libraries were used in the writing of the app:
